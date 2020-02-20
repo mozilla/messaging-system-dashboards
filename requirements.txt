@@ -1,0 +1,2 @@
+redash-api-client==0.2.7
+PyYAML==5.3
