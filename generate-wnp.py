@@ -30,9 +30,11 @@ def main():
     dashboard = rd.create_dashboard(template["title"]).json()
     dashboard_id = dashboard["id"]
 
+    full_width_chart_count = 0
     # Create charts for each query and corresponding graph
     for index, chart in enumerate(template["charts"]):
         print(f'Creating chart {chart["title"]}...')
+
         query = \
             rd.create_query(
                 BIGQUERY_SOURCE,
@@ -56,11 +58,17 @@ def main():
                     }
                 }
             ).json()
+
+        is_full_width = chart.get("full_width", False)
+        pos = calc_position(index, is_full_width, full_width_chart_count)
         rd.add_widget(
             dashboard_id,
             vs_id=graph["id"],
-            position=calc_position(index)
+            position=pos
         )
+        # Increment this counter after the widget gets added to the dashboard
+        if is_full_width:
+            full_width_chart_count += 1
 
     # Publish dashboard
     print("Publishing dashboard...")
@@ -68,19 +76,22 @@ def main():
     print("Done")
 
 
-def calc_position(index):
+def calc_position(index, full_width, full_width_chart_count):
     """ Need to manually calculate the position as it's broken in `add_widget`.
     """
     position = {
         "col": 0,
         "row": 0,
-        "sizeX": 3,
-        "sizeY": 8
+        "sizeX": 3,  # default width is 3 units, full_width is 6 units
+        "sizeY": 8   # default height is 8 units
     }
 
-    row, col = divmod(index, 2)
-    position['row'] = row * 8
-    position['col'] = col * 3
+    row, col = divmod(index - full_width_chart_count, 2)
+    position["row"] = (row + full_width_chart_count) * 8
+    position["col"] = col * 3
+
+    if full_width:
+        position["sizeX"] = 6
 
     return position
 
