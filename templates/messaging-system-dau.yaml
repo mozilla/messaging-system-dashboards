@@ -1,0 +1,119 @@
+---
+# Redash dashboard template for Messaging System.
+#
+#
+#                    Dashboard Layout
+# ---------------------------------------------------------------
+#
+#
+#   Onboarding DAU
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   CFR DAU
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   What's New Panel DAU
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Snippets DAU
+#
+#
+# ---------------------------------------------------------------
+
+
+title: "Messaging System: Daily Users"
+charts:
+  - title: "Onboarding Daily Users"
+    type: line
+    full_width: True
+    query: |
+      WITH raw_daily_users AS (
+        SELECT
+          EXTRACT(date FROM submission_timestamp) AS date,
+          COUNT(DISTINCT client_id) AS raw_dau,
+        FROM
+          messaging_system.onboarding
+        WHERE
+          EXTRACT(date FROM submission_timestamp) >= DATE_SUB(CURRENT_DATE(), INTERVAL 4 WEEK)
+          AND release_channel = 'release'
+        GROUP BY 1 )
+      SELECT
+        date,
+        raw_dau,
+        CAST(AVG(raw_dau) OVER(ORDER BY date ROWS BETWEEN 6 PRECEDING AND 0 FOLLOWING) AS INT64) AS dau
+      FROM raw_daily_users
+    x_axis: date
+    y_axis: dau
+  - title: "CFR Daily Users"
+    type: line
+    full_width: True
+    query: |
+      WITH raw_daily_users AS (
+        SELECT
+          EXTRACT(date FROM submission_timestamp) AS date,
+          COUNT(DISTINCT impression_id) AS raw_dau,
+        FROM
+          messaging_system.cfr
+        WHERE
+          EXTRACT(date FROM submission_timestamp) >= DATE_SUB(CURRENT_DATE(), INTERVAL 4 WEEK)
+          AND release_channel = 'release'
+        GROUP BY 1 )
+      SELECT
+        date,
+        raw_dau,
+        CAST(AVG(raw_dau) OVER(ORDER BY date ROWS BETWEEN 6 PRECEDING AND 0 FOLLOWING) AS INT64) AS dau
+      FROM raw_daily_users
+    x_axis: date
+    y_axis: dau
+  - title: "What's New Panel Daily Users"
+    type: line
+    full_width: True
+    query: |
+      WITH raw_daily_users AS (
+        SELECT
+          EXTRACT(date FROM submission_timestamp) AS date,
+          COUNT(DISTINCT impression_id) AS raw_dau,
+        FROM
+          messaging_system.cfr
+        WHERE
+          EXTRACT(date FROM submission_timestamp) >= DATE_SUB(CURRENT_DATE(), INTERVAL 4 WEEK)
+          AND release_channel = 'release'
+          AND bucket_id like '%WHATS_NEW%'
+        GROUP BY 1 )
+      SELECT
+        date,
+        raw_dau,
+        CAST(AVG(raw_dau) OVER(ORDER BY date ROWS BETWEEN 6 PRECEDING AND 0 FOLLOWING) AS INT64) AS dau
+      FROM raw_daily_users
+    x_axis: date
+    y_axis: dau
+  - title: "Snippets Daily Users"
+    type: line
+    full_width: True
+    query: |
+      WITH raw_daily_users AS (
+        SELECT
+          EXTRACT(date FROM submission_timestamp) AS date,
+          COUNT(DISTINCT client_id) AS raw_dau,
+        FROM
+          messaging_system.snippets
+        WHERE
+          EXTRACT(date FROM submission_timestamp) >= DATE_SUB(CURRENT_DATE(), INTERVAL 4 WEEK)
+          AND release_channel = 'release'
+        GROUP BY 1 )
+      SELECT
+        date,
+        raw_dau,
+        CAST(AVG(raw_dau) OVER(ORDER BY date ROWS BETWEEN 6 PRECEDING AND 0 FOLLOWING) AS INT64) AS dau
+      FROM raw_daily_users
+    x_axis: date
+    y_axis: dau

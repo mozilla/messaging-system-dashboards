@@ -58,7 +58,7 @@ Once the template is defined, you can generate a dashboard with the generator.
 For instance, to generate a dashboard for the "What's New Panel".
 
 ```sh
-$ ./generate-wnp.py templates/whats-new-panel.yaml
+$ ./generate.py templates/whats-new-panel.yaml
 ```
 
 Then you can go to Redash, click on `Dashboards` on the top-left, you should find the new dashboard (already published) there.

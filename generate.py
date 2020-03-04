@@ -47,10 +47,9 @@ def main():
                 "Chart",
                 x_axis=chart["x_axis"],
                 y_axis=[{
-                    "name": chart["y_axis"],
-                    "label": "actions"
+                    "name": chart["y_axis"]
                 }],
-                group_by=chart["group_by"],
+                group_by=chart.get("group_by"),
                 custom_options={
                     "xAxis": {
                         "type": "Auto Detect",
