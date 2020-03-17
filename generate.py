@@ -40,15 +40,18 @@ def main():
                 BIGQUERY_SOURCE,
                 chart["title"],
                 chart["query"]).json()
+
+        if isinstance(chart["y_axis"], list):
+            axis_y = [{"name": name} for name in chart["y_axis"]]
+        else:
+            axis_y = [{"name": chart["y_axis"]}]
         graph = \
             rd.create_visualization(
                 query["id"],
                 chart["type"],
                 "Chart",
                 x_axis=chart["x_axis"],
-                y_axis=[{
-                    "name": chart["y_axis"]
-                }],
+                y_axis=axis_y,
                 group_by=chart.get("group_by"),
                 custom_options={
                     "xAxis": {
