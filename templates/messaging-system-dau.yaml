@@ -37,103 +37,74 @@ charts:
     full_width: True
     query: |
       SELECT submission_date AS date,
-             "ALL" AS geo,
-             sum(dau) AS dau,
-             CAST(
-                AVG(SUM(dau)) OVER (ORDER BY submission_date ROWS 6 PRECEDING)
-             AS INT64) AS smoothed_dau
-      FROM messaging_system.onboarding_exact_mau28_by_dimensions
+             SUM(dau) AS dau,
+             CAST(AVG(SUM(dau)) OVER w1 AS INT64) AS dau_smoothed,
+             SUM(IF(country IN ('US', 'FR', 'DE', 'GB', 'CA'), dau, 0)) AS tier1_dau,
+             CAST(AVG(SUM(IF (country IN ('US', 'FR', 'DE', 'GB', 'CA'), dau, 0))) OVER w1 AS INT64) AS tier1_dau_smoothed
+      FROM `moz-fx-data-shared-prod.messaging_system.onboarding_exact_mau28_by_dimensions`
       WHERE release_channel = 'release'
       GROUP BY 1
-      UNION ALL
-      SELECT submission_date AS date,
-             "TIER-1" AS geo,
-             sum(dau) AS dau,
-             CAST(
-                AVG(SUM(dau)) OVER (ORDER BY submission_date ROWS 6 PRECEDING)
-             AS INT64) AS smoothed_dau
-      FROM messaging_system.onboarding_exact_mau28_by_dimensions
-      WHERE release_channel = 'release'
-        AND country IN ('US', 'GB', 'DE', 'FR', 'CA')
-      GROUP BY 1
+      WINDOW w1 AS (ORDER BY submission_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
     x_axis: date
-    y_axis: smoothed_dau
-    group_by: geo
+    y_axis:
+      - dau
+      - tier1_dau
+      - dau_smoothed
+      - tier1_dau_smoothed
   - title: "CFR Daily Users"
     type: line
     full_width: True
     query: |
       SELECT submission_date AS date,
-             "ALL" AS geo,
-             sum(dau) AS dau,
-             CAST(
-                AVG(SUM(dau)) OVER (ORDER BY submission_date ROWS 6 PRECEDING)
-             AS INT64) AS smoothed_dau
-      FROM messaging_system.cfr_exact_mau28_by_dimensions
+             SUM(dau) AS dau,
+             CAST(AVG(SUM(dau)) OVER w1 AS INT64) AS dau_smoothed,
+             SUM(IF(country IN ('US', 'FR', 'DE', 'GB', 'CA'), dau, 0)) AS tier1_dau,
+             CAST(AVG(SUM(IF (country IN ('US', 'FR', 'DE', 'GB', 'CA'), dau, 0))) OVER w1 AS INT64) AS tier1_dau_smoothed
+      FROM `moz-fx-data-shared-prod.messaging_system.cfr_exact_mau28_by_dimensions`
       WHERE release_channel = 'release'
       GROUP BY 1
-      UNION ALL
-      SELECT submission_date AS date,
-             "TIER-1" AS geo,
-             sum(dau) AS dau,
-             CAST(
-                AVG(SUM(dau)) OVER (ORDER BY submission_date ROWS 6 PRECEDING)
-             AS INT64) AS smoothed_dau
-      FROM messaging_system.cfr_exact_mau28_by_dimensions
-      WHERE release_channel = 'release'
-        AND country IN ('US', 'GB', 'DE', 'FR', 'CA')
-      GROUP BY 1
+      WINDOW w1 AS (ORDER BY submission_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
     x_axis: date
-    y_axis: smoothed_dau
-    group_by: geo
+    y_axis:
+      - dau
+      - tier1_dau
+      - dau_smoothed
+      - tier1_dau_smoothed
   - title: "What's New Panel Daily Users"
     type: line
     full_width: True
     query: |
       SELECT submission_date AS date,
-             "ALL" AS geo,
-             sum(dau) AS dau,
-             CAST(
-                AVG(SUM(whats_new_dau)) OVER (ORDER BY submission_date ROWS 6 PRECEDING)
-             AS INT64) AS smoothed_dau
-      FROM messaging_system.cfr_exact_mau28_by_dimensions
+             SUM(whats_new_dau) AS dau,
+             CAST(AVG(SUM(whats_new_dau)) OVER w1 AS INT64) AS dau_smoothed,
+             SUM(IF(country IN ('US', 'FR', 'DE', 'GB', 'CA'), whats_new_dau, 0)) AS tier1_dau,
+             CAST(AVG(SUM(IF (country IN ('US', 'FR', 'DE', 'GB', 'CA'), whats_new_dau, 0))) OVER w1 AS INT64) AS tier1_dau_smoothed
+      FROM `moz-fx-data-shared-prod.messaging_system.cfr_exact_mau28_by_dimensions`
       WHERE release_channel = 'release'
       GROUP BY 1
-      UNION ALL
-      SELECT submission_date AS date,
-             "TIER-1" AS geo,
-             sum(dau) AS dau,
-             CAST(
-                AVG(SUM(whats_new_dau)) OVER (ORDER BY submission_date ROWS 6 PRECEDING)
-             AS INT64) AS smoothed_dau
-      FROM messaging_system.cfr_exact_mau28_by_dimensions
-      WHERE release_channel = 'release'
-      AND country IN ('US', 'GB', 'DE', 'FR', 'CA')
-      GROUP BY 1
+      WINDOW w1 AS (ORDER BY submission_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
     x_axis: date
-    y_axis: smoothed_dau
-    group_by: geo
+    y_axis:
+      - dau
+      - tier1_dau
+      - dau_smoothed
+      - tier1_dau_smoothed
   - title: "Snippets Daily Users"
     type: line
     full_width: True
     query: |
       SELECT submission_date AS date,
-             "ALL" AS geo,
-             sum(dau) AS dau,
-             CAST(
-                AVG(SUM(dau)) OVER (ORDER BY submission_date ROWS 6 PRECEDING)
-             AS INT64) AS smoothed_dau
-      FROM messaging_system.snippets_exact_mau28_by_dimensions
+             SUM(dau) AS dau,
+             CAST(AVG(SUM(dau)) OVER w1 AS INT64) AS dau_smoothed,
+             SUM(IF(country IN ('US', 'FR', 'DE', 'GB', 'CA'), dau, 0)) AS tier1_dau,
+             CAST(AVG(SUM(IF (country IN ('US', 'FR', 'DE', 'GB', 'CA'), dau, 0))) OVER w1 AS INT64) AS tier1_dau_smoothed
+      FROM `moz-fx-data-shared-prod.messaging_system.snippets_exact_mau28_by_dimensions`
       WHERE release_channel = 'release'
       GROUP BY 1
-      UNION ALL
-      SELECT submission_date AS date,
-             "TIER-1" AS geo,
-             sum(dau) AS dau,
-             CAST(
-                AVG(SUM(dau)) OVER (ORDER BY submission_date ROWS 6 PRECEDING)
-             AS INT64) AS smoothed_dau
-      FROM messaging_system.snippets_exact_mau28_by_dimensions
-      WHERE release_channel = 'release'
-        AND country IN ('US', 'GB', 'DE', 'FR', 'CA')
-      GROUP BY 1
+      WINDOW w1 AS (ORDER BY submission_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)
+    x_axis: date
+    y_axis:
+      - dau
+      - tier1_dau
+      - dau_smoothed
+      - tier1_dau_smoothed
