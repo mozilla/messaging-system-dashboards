@@ -8,7 +8,7 @@ from redashAPI import RedashAPIClient
 
 
 USAGE = """
-    Usage: ./generate-wnp path/to/template.yaml
+    Usage: ./generate.py path/to/template.yaml
 """
 
 STMO = "https://sql.telemetry.mozilla.org"

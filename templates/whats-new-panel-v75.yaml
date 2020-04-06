@@ -1,0 +1,110 @@
+---
+# Redash dashboard template for Whats-new-panel.
+#
+#
+#                    Dashboard Layout
+# ---------------------------------------------------------------
+#                              |                                
+#                              |
+#   Badge: Impression/Clicks   | What's New Toolbar button CTR
+#                              |
+#                              |
+# ---------------------------------------------------------------
+#                              |                                
+#                              |
+#   What's New Access Path     |       Panel Message Clicks
+#                              |
+#                              |
+# ---------------------------------------------------------------
+
+
+title: "(AUTO) Messaging System: What's New Panel (Firefox 75)"
+charts:
+  - title: "WNP 75: Badge Impression&Clicks"
+    type: line
+    query: |
+      SELECT EXTRACT(date from submission_timestamp) as date,
+       event,
+       count(*) as count,
+      FROM messaging_system.cfr
+      WHERE DATE(submission_timestamp) BETWEEN '2020-04-06' AND '2020-05-05'
+        AND release_channel = 'release'
+        AND version LIKE '75%'
+        AND event in ('IMPRESSION', 'CLICK')
+        AND bucket_id = 'WHATS_NEW_BADGE_75'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: count
+    group_by: event
+  - title: "WNP 75: Badge CTR"
+    type: line
+    query: |
+      WITH clicks AS (
+        SELECT
+          EXTRACT(date from submission_timestamp) as date,
+          count(*) as clicks
+        FROM
+          messaging_system.cfr
+      WHERE DATE(submission_timestamp) BETWEEN '2020-04-06' AND '2020-05-05'
+          AND release_channel = 'release'
+          AND version LIKE '75%'
+          AND bucket_id = 'WHATS_NEW_BADGE_75'
+          AND event = 'CLICK'
+        GROUP BY
+          1
+      ),
+      impressions AS (
+        SELECT
+          EXTRACT(date from submission_timestamp) as date,
+          count(*) as impressions
+        FROM
+          messaging_system.cfr
+      WHERE DATE(submission_timestamp) BETWEEN '2020-04-06' AND '2020-05-05'
+          AND release_channel = 'release'
+          AND version LIKE '75%'
+          AND bucket_id = 'WHATS_NEW_BADGE_75'
+          AND event = 'IMPRESSION'
+        GROUP BY
+          1
+      )
+      SELECT
+        clicks.*,
+        impressions.impressions,
+        cast(clicks.clicks as float64) / impressions.impressions * 100 as CTR
+      FROM
+        clicks
+        JOIN impressions ON clicks.date = impressions.date
+    x_axis: date
+    y_axis: CTR
+    group_by: null
+  - title: "WNP 75: Access Path"
+    type: bar
+    query: |
+      SELECT EXTRACT(date FROM submission_timestamp) AS date,
+        event_context,
+        count(*) as count
+      FROM messaging_system.cfr
+      WHERE DATE(submission_timestamp) BETWEEN '2020-04-06' AND '2020-05-05'
+        AND bucket_id = 'WHATS_NEW_AWESOMEBAR_75,WHATS_NEW_FINGERPRINTER_COUNTER_72,WHATS_NEW_PIP_72'
+      GROUP BY 1, 2;
+    x_axis: date
+    y_axis: count
+    group_by: event_context
+  - title: "WNP 75: Message Clicks"
+    type: line
+    query: |
+      SELECT EXTRACT(date FROM submission_timestamp) AS date,
+        message_id,
+        count(*) AS count,
+      FROM messaging_system.cfr
+      WHERE DATE(submission_timestamp) BETWEEN '2020-04-06' AND '2020-05-05'
+        AND release_channel = 'release'
+        AND version LIKE '75%'
+        AND bucket_id IN ( 'WHATS_NEW_AWESOMEBAR_75',
+                            'WHATS_NEW_FINGERPRINTER_COUNTER_72',
+                            'WHATS_NEW_PIP_72')
+      GROUP BY 1, 2
+      ORDER BY 3 DESC
+    x_axis: date
+    y_axis: count
+    group_by: message_id
