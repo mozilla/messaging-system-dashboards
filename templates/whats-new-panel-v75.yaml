@@ -94,7 +94,7 @@ charts:
     type: line
     query: |
       SELECT EXTRACT(date FROM submission_timestamp) AS date,
-        message_id,
+        bucket_id,
         count(*) AS count,
       FROM messaging_system.cfr
       WHERE DATE(submission_timestamp) BETWEEN '2020-04-06' AND '2020-05-05'
@@ -107,4 +107,4 @@ charts:
       ORDER BY 3 DESC
     x_axis: date
     y_axis: count
-    group_by: message_id
+    group_by: bucket_id
