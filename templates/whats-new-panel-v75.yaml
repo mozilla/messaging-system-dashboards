@@ -4,17 +4,35 @@
 #
 #                    Dashboard Layout
 # ---------------------------------------------------------------
-#                              |                                
-#                              |
-#   Badge: Impression/Clicks   | What's New Toolbar button CTR
-#                              |
-#                              |
+#
+#
+#   Badge: Impression/Clicks
+#
+#
 # ---------------------------------------------------------------
-#                              |                                
-#                              |
-#   What's New Access Path     |       Panel Message Clicks
-#                              |
-#                              |
+#
+#
+#   Badge: CTR
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   What's New Access Path
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Panel Message Clicks
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Panel Message CTR
+#
+#
 # ---------------------------------------------------------------
 
 
@@ -22,6 +40,7 @@ title: "(AUTO) Messaging System: What's New Panel (Firefox 75)"
 charts:
   - title: "WNP 75: Badge Impression&Clicks"
     type: line
+    full_width: true
     query: |
       SELECT EXTRACT(date from submission_timestamp) as date,
        event,
@@ -38,6 +57,7 @@ charts:
     group_by: event
   - title: "WNP 75: Badge CTR"
     type: line
+    full_width: true
     query: |
       WITH clicks AS (
         SELECT
@@ -78,7 +98,8 @@ charts:
     y_axis: CTR
     group_by: null
   - title: "WNP 75: Access Path"
-    type: bar
+    type: line
+    full_width: true
     query: |
       SELECT EXTRACT(date FROM submission_timestamp) AS date,
         event_context,
@@ -107,4 +128,41 @@ charts:
       ORDER BY 3 DESC
     x_axis: date
     y_axis: count
+    group_by: bucket_id
+  - title: "WNP 75: Message Click Through Rates"
+    type: line
+    full_width: true
+    query: |
+      WITH imps AS
+        (SELECT EXTRACT(date
+                        FROM submission_timestamp) AS date,
+                count(*) AS impressions
+         FROM messaging_system.cfr
+         WHERE DATE(submission_timestamp) BETWEEN '2020-04-06' AND '2020-05-05'
+           AND release_channel = 'release'
+           AND VERSION LIKE '75%'
+           AND bucket_id = 'WHATS_NEW_BADGE_75'
+           AND event = 'CLICK'
+         GROUP BY 1),
+           clicks AS
+        (SELECT EXTRACT(date
+                        FROM submission_timestamp) AS date,
+                bucket_id,
+                count(*) AS clicks,
+         FROM messaging_system.cfr
+         WHERE DATE(submission_timestamp) BETWEEN '2020-04-06' AND '2020-05-05'
+           AND release_channel = 'release'
+           AND VERSION LIKE '75%'
+           AND bucket_id IN ('WHATS_NEW_AWESOMEBAR_75',
+                             'WHATS_NEW_FINGERPRINTER_COUNTER_72',
+                             'WHATS_NEW_PIP_72')
+         GROUP BY 1,
+                  2)
+      SELECT clicks.date,
+          clicks.bucket_id,
+          CAST(clicks.clicks AS FLOAT64) * 100 / imps.impressions AS ctr
+      FROM clicks
+      JOIN imps ON clicks.date = imps.date
+    x_axis: date
+    y_axis: ctr
     group_by: bucket_id
