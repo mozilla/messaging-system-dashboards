@@ -1,0 +1,95 @@
+---
+# Redash dashboard template for Heartbeat V2 75.
+#
+#
+#                    Dashboard Layout
+# ---------------------------------------------------------------
+#
+#
+#   Daily Users
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Events (IMPRESSION, CLICK_DOORHANGER)
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Click Through Rate (CTR)
+#
+#
+# ---------------------------------------------------------------
+title: "Messaging System: Heartbeat"
+charts:
+  - title: "Daily Users"
+    type: line
+    full_width: true
+    query: |
+      SELECT DATE(submission_timestamp) AS date,
+        event,
+        count(distinct impression_id) AS users
+      FROM `moz-fx-data-shared-prod.messaging_system_live.cfr_v1`
+      WHERE DATE(submission_timestamp) BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 28 DAY) AND CURRENT_DATE()
+        AND bucket_id = 'HEARTBEAT_TACTIC_2_75,'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: users
+    group_by: event
+  - title: "Daily Events"
+    type: line
+    full_width: true
+    query: |
+      SELECT DATE(submission_timestamp) AS date,
+        event,
+        count(*) AS actions
+      FROM `moz-fx-data-shared-prod.messaging_system_live.cfr_v1`
+      WHERE DATE(submission_timestamp) BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 28 DAY) AND CURRENT_DATE()
+        AND bucket_id = 'HEARTBEAT_TACTIC_2_75,'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: actions
+    group_by: event
+  - title: "Click Through Rate (CTR)"
+    type: line
+    full_width: true
+    query: |
+      WITH
+      raw AS (
+      SELECT
+        DATE(submission_timestamp) AS date,
+        CASE event
+          WHEN 'IMPRESSION' THEN 'evt_1_impression'
+          WHEN 'CLICK_DOORHANGER' THEN 'evt_2_click'
+      END
+        AS encoded_event,
+        COUNT(*) AS actions,
+      FROM
+        `moz-fx-data-shared-prod.messaging_system_live.cfr_v1`
+      WHERE
+        DATE(submission_timestamp) BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 28 DAY) AND CURRENT_DATE()
+        AND bucket_id = 'HEARTBEAT_TACTIC_2_75,'
+        AND event IN ('IMPRESSION', 'CLICK_DOORHANGER')
+      GROUP BY
+        1,
+        2
+      ORDER BY
+        1,
+        2),
+      combined AS (
+      SELECT
+        date,
+        ARRAY_AGG(actions) AS actions
+      FROM
+        raw
+      GROUP BY
+        1 )
+      SELECT
+        date,
+        CAST(IFNULL(actions[SAFE_OFFSET(1)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS CTR
+      FROM
+        combined
+    x_axis: date
+    y_axis: CTR
