@@ -216,7 +216,7 @@ charts:
       WHERE submission_timestamp >= '2020-04-14'
         AND event = 'CLICK_BUTTON'
         AND message_id IN ('TRAILHEAD_CARD_2', 'TRAILHEAD_CARD_3', 'TRAILHEAD_CARD_4')
-        AND shield_id like '%control-join-dynamic%'
+        AND shield_id like '%treatment-simplified-dynamic%'
         AND event_context like '%about:welcome%'
       GROUP BY 1, 2
     x_axis: date
