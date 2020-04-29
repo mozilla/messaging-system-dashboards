@@ -1,0 +1,206 @@
+---
+# Redash dashboard template for CFR.
+#
+#
+#                    Dashboard Layout
+# ---------------------------------------------------------------
+#
+#
+#   Enrollment
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Events - Control (IMPRESSION, CLICK_DOORHANGER, INSTALL, DISMISS, BLOCK, MANAGE)
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Events - Variant_1 (IMPRESSION, CLICK_DOORHANGER, INSTALL, DISMISS, BLOCK, MANAGE)
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Events Ratio - Control (CLICK_DOORHANGER, INSTALL, DISMISS, DISMISS, BLOCK, MANAGE)
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Events Ratio - Variant_1 (CLICK_DOORHANGER, INSTALL, DISMISS, DISMISS, BLOCK, MANAGE)
+#
+#
+# ---------------------------------------------------------------
+
+
+title: "CFR Experiment: X-MAN A/A Test - Facebook Container"
+charts:
+  - title: "User Enrollment (daily)"
+    type: line
+    full_width: True
+    query: |
+      SELECT submission_date AS date,
+        udf.get_key(event_map_values, "branch") AS branch,
+        count(distinct client_id) AS enrolled
+      FROM `moz-fx-data-shared-prod.telemetry_derived.events_live`
+      WHERE event_category = "normandy"
+        AND event_method = 'enroll'
+        AND event_string_value LIKE "%cfr_xman_smoke_test%"
+        AND submission_date >= "2020-04-29"
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: enrolled
+    group_by: branch
+  - title: "Daily Events - (control)"
+    type: bar
+    full_width: True
+    query: |
+      SELECT DATE(submission_timestamp) AS date,
+        event,
+        count(*) AS actions
+      FROM `moz-fx-data-shared-prod.messaging_system_live.cfr_v1`
+      WHERE submission_timestamp >= "2020-04-29"
+        AND message_id = 'FACEBOOK_CONTAINER_3_72'
+        AND udf.get_key(experiments, 'cfr_xman_smoke_test').branch = 'control'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: actions
+    group_by: event
+  - title: "Daily Events - (variant_1)"
+    type: bar
+    full_width: True
+    query: |
+      SELECT DATE(submission_timestamp) AS date,
+        event,
+        count(*) AS actions
+      FROM `moz-fx-data-shared-prod.messaging_system_live.cfr_v1`
+      WHERE submission_timestamp >= "2020-04-29"
+        AND message_id = 'FACEBOOK_CONTAINER_3_72'
+        AND udf.get_key(experiments, 'cfr_xman_smoke_test').branch = 'variant_1'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: actions
+    group_by: event
+  - title: "Daily Events Ratio - (control)"
+    type: line
+    full_width: True
+    query: |
+      WITH
+      raw AS (
+      SELECT
+        DATE(submission_timestamp) AS date,
+        CASE event
+          WHEN 'IMPRESSION' THEN 'evt_1_impression'
+          WHEN 'CLICK_DOORHANGER' THEN 'evt_2_click'
+          WHEN 'INSTALL' THEN 'evt_3_install'
+          WHEN 'DISMISS' THEN 'evt_4_dismiss'
+          WHEN 'BLOCK' THEN 'evt_5_block'
+          WHEN 'MANAGE' THEN 'evt_5_manage'
+      END
+        AS encoded_event,
+        COUNT(*) AS actions,
+      FROM
+        `moz-fx-data-shared-prod.messaging_system_live.cfr_v1`
+      WHERE
+        submission_timestamp >= "2020-04-29"
+        AND message_id = 'FACEBOOK_CONTAINER_3_72'
+        AND event IN ('IMPRESSION',
+          'CLICK_DOORHANGER',
+          'INSTALL',
+          'DISMISS',
+          'BLOCK',
+          'MANAGE')
+        AND udf.get_key(experiments, 'cfr_xman_smoke_test').branch = 'control'
+      GROUP BY
+        1,
+        2
+      ORDER BY
+        1,
+        2),
+      combined AS (
+      SELECT
+        date,
+        ARRAY_AGG(actions) AS actions
+      FROM
+        raw
+      GROUP BY
+        1 )
+      SELECT
+        date,
+        CAST(IFNULL(actions[SAFE_OFFSET(1)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS click_rate,
+        CAST(IFNULL(actions[SAFE_OFFSET(2)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS install_rate,
+        CAST(IFNULL(actions[SAFE_OFFSET(3)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS dismiss_rate,
+        CAST(IFNULL(actions[SAFE_OFFSET(4)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS block_rate,
+        CAST(IFNULL(actions[SAFE_OFFSET(5)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS manage_rate,
+      FROM
+        combined
+    x_axis: date
+    y_axis:
+      - click_rate
+      - install_rate
+      - dismiss_rate
+      - block_rate
+      - manage_rate
+  - title: "Daily Events Ratio - (variant_1)"
+    type: line
+    full_width: True
+    query: |
+      WITH
+      raw AS (
+      SELECT
+        DATE(submission_timestamp) AS date,
+        CASE event
+          WHEN 'IMPRESSION' THEN 'evt_1_impression'
+          WHEN 'CLICK_DOORHANGER' THEN 'evt_2_click'
+          WHEN 'INSTALL' THEN 'evt_3_install'
+          WHEN 'DISMISS' THEN 'evt_4_dismiss'
+          WHEN 'BLOCK' THEN 'evt_5_block'
+          WHEN 'MANAGE' THEN 'evt_5_manage'
+      END
+        AS encoded_event,
+        COUNT(*) AS actions,
+      FROM
+        `moz-fx-data-shared-prod.messaging_system_live.cfr_v1`
+      WHERE
+        submission_timestamp >= "2020-04-29"
+        AND message_id = 'FACEBOOK_CONTAINER_3_72'
+        AND event IN ('IMPRESSION',
+          'CLICK_DOORHANGER',
+          'INSTALL',
+          'DISMISS',
+          'BLOCK',
+          'MANAGE')
+        AND udf.get_key(experiments, 'cfr_xman_smoke_test').branch = 'variant_1'
+      GROUP BY
+        1,
+        2
+      ORDER BY
+        1,
+        2),
+      combined AS (
+      SELECT
+        date,
+        ARRAY_AGG(actions) AS actions
+      FROM
+        raw
+      GROUP BY
+        1 )
+      SELECT
+        date,
+        CAST(IFNULL(actions[SAFE_OFFSET(1)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS click_rate,
+        CAST(IFNULL(actions[SAFE_OFFSET(2)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS install_rate,
+        CAST(IFNULL(actions[SAFE_OFFSET(3)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS dismiss_rate,
+        CAST(IFNULL(actions[SAFE_OFFSET(4)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS block_rate,
+        CAST(IFNULL(actions[SAFE_OFFSET(5)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS manage_rate,
+      FROM
+        combined
+    x_axis: date
+    y_axis:
+      - click_rate
+      - install_rate
+      - dismiss_rate
+      - block_rate
+      - manage_rate
