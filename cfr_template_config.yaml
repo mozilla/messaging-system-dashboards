@@ -1,0 +1,9 @@
+---  # CFR template config
+
+DASHBOARD_TITLE: "CFR Exeperiment: Facebook"
+EXPERIMENT_SLUG: cfr_exp_facebook
+BRANCHES:
+  - control
+  - variant_1
+EXPERIMENT_BEGIN_DATE: 2020-05-01
+MESSAGE_ID: CFR_FACEBOOK_CONTAINTER_03
