@@ -8,19 +8,31 @@ from jinja2 import Environment, FileSystemLoader
 
 USAGE = """
     Usage:
-        ./generate_template.py config.yaml meta_template.py out.yaml
+        ./generate_template.py [cfr|wnp|onboarding] path/to/output.yaml
 
     Example:
-        ./generate_template.py templates/cfr_template_config.yaml cfr.template.yaml templates/cfr/out.yaml
+        ./generate_template.py cfr templates/cfr/output.yaml
 """
+
+TEMPLATE_PATHS = {
+    "cfr": ("cfr_template_config.yaml", "cfr.yaml.template")
+}
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 2:
         print(USAGE)
         sys.exit(1)
 
-    with open(sys.argv[1], "r") as f:
+    if sys.argv[1] not in TEMPLATE_PATHS:
+        print("Invalid template type '{}', "
+              "it must be one of 'cfr', 'wnp', and 'onboarding'"
+              .format(sys.argv[1]))
+        sys.exit(1)
+
+    config_file, template_file = TEMPLATE_PATHS.get(sys.argv[1])
+
+    with open(config_file, "r") as f:
         config = yaml.load(f, yaml.FullLoader)
 
     env = Environment(
@@ -28,7 +40,7 @@ if __name__ == "__main__":
         trim_blocks=True,
         lstrip_blocks=True
     )
-    template = env.get_template(sys.argv[2])
+    template = env.get_template(template_file)
 
-    with open(sys.argv[3], "w") as f:
+    with open(sys.argv[2], "w") as f:
         f.write(template.render(config))
