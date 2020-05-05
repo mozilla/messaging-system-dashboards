@@ -1,0 +1,37 @@
+---  # Onboarding template config
+
+DASHBOARD_TITLE: |
+  "Onboarding Exeperiment: Simplified about:welcome Pull Factor 76"
+EXPERIMENT_SLUG: aw_pull_factor_v1_76
+EXPERIMENT_BEGIN_DATE: 2020-04-27
+BRANCHES:
+  - slug: control
+    cards:
+      - TRAILHEAD_CARD_2
+      - TRAILHEAD_CARD_3
+      - TRAILHEAD_CARD_4
+  - slug: variant_1
+    cards:
+      - TRAILHEAD_CARD_12
+      - TRAILHEAD_CARD_3
+      - TRAILHEAD_CARD_4
+  - slug: variant_2
+    cards:
+      - TRAILHEAD_CARD_12
+      - TRAILHEAD_CARD_3
+      - TRAILHEAD_CARD_4
+  - slug: variant_3
+    cards:
+      - TRAILHEAD_CARD_2
+      - TRAILHEAD_CARD_3
+      - TRAILHEAD_CARD_4
+TRIPLET_ID_LIST:
+  - TRAILHEAD_CARD_2
+  - TRAILHEAD_CARD_3
+  - TRAILHEAD_CARD_4
+  - TRAILHEAD_CARD_12
+CARD_ID_MAP:
+  TRAILHEAD_CARD_2: Sync
+  TRAILHEAD_CARD_3: Monitor
+  TRAILHEAD_CARD_4: Private Browsing
+  TRAILHEAD_CARD_12: Data Promise
