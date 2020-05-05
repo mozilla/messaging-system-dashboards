@@ -1,0 +1,13 @@
+---  # Whats-new-panel template config
+
+DASHBOARD_TITLE: "Messaging System: What's New Panel in Firefox 76"
+FIREFOX_VERSON: 76
+RELEASE_BEGIN_DATE: 2020-05-05
+RELEASE_END_DATE: 2020-06-02
+WNP_BADGE_ID: WHATS_NEW_BADGE_76
+PANEL_MESSAGE_IDS:
+  # The order matters, it should have the same order as the `bucket_id` in the
+  # panel impression ping
+  - WHATS_NEW_LOCKWISE_PASSWORDS_76
+  - WHATS_NEW_PIP_76
+  - WHATS_NEW_VULNERABLE_PASSWORDS_76

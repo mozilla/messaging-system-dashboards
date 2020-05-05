@@ -1,0 +1,162 @@
+---
+# Redash dashboard template for Whats-new-panel.
+#
+#
+#                    Dashboard Layout
+# ---------------------------------------------------------------
+#
+#
+#   Badge: Impression/Clicks
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Badge: CTR
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   What's New Access Path
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Panel Message Clicks
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Panel Message CTR
+#
+#
+# ---------------------------------------------------------------
+title: "{{ DASHBOARD_TITLE }}"
+charts:
+  - title: "WNP {{ FIREFOX_VERSON }}: Badge Impression & Clicks"
+    type: line
+    full_width: true
+    query: |
+      SELECT EXTRACT(date from submission_timestamp) as date,
+       event,
+       count(*) as count,
+      FROM `moz-fx-data-shared-prod.messaging_system_live.cfr_v1`
+      WHERE DATE(submission_timestamp) BETWEEN '{{ RELEASE_BEGIN_DATE }}' AND '{{ RELEASE_END_DATE }}'
+        AND release_channel = 'release'
+        AND version LIKE '{{ FIREFOX_VERSON }}%'
+        AND event in ('IMPRESSION', 'CLICK')
+        AND bucket_id = '{{ WNP_BADGE_ID }}'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: count
+    group_by: event
+  - title: "WNP {{ FIREFOX_VERSON }}: Badge CTR"
+    type: line
+    full_width: true
+    query: |
+      WITH clicks AS (
+        SELECT
+          EXTRACT(date from submission_timestamp) as date,
+          count(*) as clicks
+        FROM `moz-fx-data-shared-prod.messaging_system_live.cfr_v1`
+        WHERE DATE(submission_timestamp) BETWEEN '{{ RELEASE_BEGIN_DATE }}' AND '{{ RELEASE_END_DATE }}'
+          AND release_channel = 'release'
+          AND version LIKE '{{ FIREFOX_VERSON }}%'
+          AND bucket_id = '{{ WNP_BADGE_ID }}'
+          AND event = 'CLICK'
+        GROUP BY
+          1
+      ),
+      impressions AS (
+        SELECT
+          EXTRACT(date from submission_timestamp) as date,
+          count(*) as impressions
+        FROM `moz-fx-data-shared-prod.messaging_system_live.cfr_v1`
+        WHERE DATE(submission_timestamp) BETWEEN '{{ RELEASE_BEGIN_DATE }}' AND '{{ RELEASE_END_DATE }}'
+          AND release_channel = 'release'
+          AND version LIKE '{{ FIREFOX_VERSON }}%'
+          AND bucket_id = '{{ WNP_BADGE_ID }}'
+          AND event = 'IMPRESSION'
+        GROUP BY
+          1
+      )
+      SELECT
+        clicks.*,
+        impressions.impressions,
+        cast(clicks.clicks as float64) / impressions.impressions * 100 as CTR
+      FROM
+        clicks
+        JOIN impressions ON clicks.date = impressions.date
+    x_axis: date
+    y_axis: CTR
+    group_by: null
+  - title: "WNP {{ FIREFOX_VERSON }}: Access Path"
+    type: line
+    full_width: true
+    query: |
+      SELECT EXTRACT(date FROM submission_timestamp) AS date,
+        event_context,
+        count(*) as count
+      FROM `moz-fx-data-shared-prod.messaging_system_live.cfr_v1`
+      WHERE DATE(submission_timestamp) BETWEEN '{{ RELEASE_BEGIN_DATE }}' AND '{{ RELEASE_END_DATE }}'
+        AND release_channel = 'release'
+        AND version LIKE '{{ FIREFOX_VERSON }}%'
+        AND bucket_id = '{{ PANEL_MESSAGE_IDS|join(",") }}'
+      GROUP BY 1, 2;
+    x_axis: date
+    y_axis: count
+    group_by: event_context
+  - title: "WNP {{ FIREFOX_VERSON }}: Message Clicks"
+    type: line
+    full_width: true
+    query: |
+      SELECT EXTRACT(date FROM submission_timestamp) AS date,
+        bucket_id,
+        count(*) AS clicks,
+      FROM `moz-fx-data-shared-prod.messaging_system_live.cfr_v1`
+      WHERE DATE(submission_timestamp) BETWEEN '{{ RELEASE_BEGIN_DATE }}' AND '{{ RELEASE_END_DATE }}'
+        AND release_channel = 'release'
+        AND version LIKE '{{FIREFOX_VERSON}}%'
+        AND bucket_id IN ('{{ PANEL_MESSAGE_IDS|join("', '") }}')
+        AND event = 'CLICK'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: clicks
+    group_by: bucket_id
+  - title: "WNP {{ FIREFOX_VERSON }}: Message Click Through Rates"
+    type: line
+    full_width: true
+    query: |
+      WITH imps AS
+        (SELECT EXTRACT(date FROM submission_timestamp) AS date,
+                count(*) AS impressions
+         FROM `moz-fx-data-shared-prod.messaging_system_live.cfr_v1`
+         WHERE DATE(submission_timestamp) BETWEEN '{{ RELEASE_BEGIN_DATE }}' AND '{{ RELEASE_END_DATE }}'
+           AND release_channel = 'release'
+           AND version LIKE '{{ FIREFOX_VERSON }}%'
+           AND event = 'IMPRESSION'
+           AND bucket_id = '{{ PANEL_MESSAGE_IDS|join(",") }}'
+         GROUP BY 1),
+           clicks AS
+        (SELECT EXTRACT(date FROM submission_timestamp) AS date,
+                bucket_id,
+                count(*) AS clicks,
+         FROM `moz-fx-data-shared-prod.messaging_system_live.cfr_v1`
+         WHERE DATE(submission_timestamp) BETWEEN '{{ RELEASE_BEGIN_DATE }}' AND '{{ RELEASE_END_DATE }}'
+           AND release_channel = 'release'
+           AND version LIKE '{{ FIREFOX_VERSON }}%'
+           AND event = 'CLICK'
+         AND bucket_id IN ('{{ PANEL_MESSAGE_IDS|join("', '") }}')
+         GROUP BY 1,
+                  2)
+      SELECT clicks.date,
+          clicks.bucket_id,
+          CAST(clicks.clicks AS FLOAT64) * 100 / imps.impressions AS ctr
+      FROM clicks
+      JOIN imps ON clicks.date = imps.date
+    x_axis: date
+    y_axis: ctr
+    group_by: bucket_id

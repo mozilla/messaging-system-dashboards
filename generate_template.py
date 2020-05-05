@@ -17,7 +17,8 @@ USAGE = """
 TEMPLATE_PATHS = {
     "cfr": ("cfr_template_config.yaml", "cfr.yaml.template"),
     "onboarding":
-        ("onboarding_template_config.yaml", "onboarding.yaml.template")
+        ("onboarding_template_config.yaml", "onboarding.yaml.template"),
+    "wnp": ("wnp_template_config.yaml", "wnp.yaml.template")
 }
 
 
