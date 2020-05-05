@@ -64,3 +64,17 @@ $ ./generate.py templates/whats-new-panel.yaml
 Then you can go to Redash, click on `Dashboards` on the top-left, you should find the new dashboard (already published) there.
 
 Note that for each chart, there should be a new query crated on Redash, though it's not published. You can find them in the `Queries` section on Redash.
+
+### Predefined templates
+
+For those recurring experiments and features like CFR, Onboarding, and Whats-new-panel, we have various template generators available for you to easily generate Redash templates.
+
+```sh
+$ ./generate_template.py [cfr|wnp|onboarding] /path/to/output.yaml
+
+# this generates a CFR experiment dashboard template
+$ ./generate_template.py cfr template/cfr/cfr-exp-foo.yaml
+
+# then you can use this template to generate the dashboard
+$ ./generate.py template/cfr/cfr-exp-foo.yaml
+```
