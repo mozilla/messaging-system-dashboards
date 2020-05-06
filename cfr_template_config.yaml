@@ -1,9 +1,9 @@
 ---  # CFR template config
 
-DASHBOARD_TITLE: "CFR Exeperiment: Facebook Container A/A Test (beta)"
-EXPERIMENT_SLUG: cfr_xman_smoke_test
+DASHBOARD_TITLE: "CFR Experiment: Picture-in-Picture Normandy in 77 (beta)"
+EXPERIMENT_SLUG: bug-1635199-message-recommend-picture-in-picture-cfr-beta-77-77
 BRANCHES:
-  - control
-  - variant_1
-EXPERIMENT_BEGIN_DATE: 2020-04-30
-MESSAGE_ID: FACEBOOK_CONTAINER_3_72
+  - n4s_pip_control
+  - n4s_pip_cfr
+EXPERIMENT_BEGIN_DATE: 2020-05-05
+MESSAGE_ID: N4S_PIP_CFR_MESSSAGE
