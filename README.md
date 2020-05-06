@@ -4,7 +4,7 @@ Auto generate dashboard on Redash for User Journey
 
 ```sh
 # This utility requires Python 3, highly recommended to use the virtual environment
-$ virtualenv venv 
+$ virtualenv venv
 $ source venv/bin/activate
 
 # Install dependencies
@@ -19,7 +19,7 @@ $ pip install -r requirements.txt
 
 ### Dashboard Template
 
-Each dashboard is defined by a dashboard template file (YAML), which, in turn, is comprised of 
+Each dashboard is defined by a dashboard template file (YAML), which, in turn, is comprised of
 a title and a list of charts.
 
 #### Define Chart
@@ -70,10 +70,10 @@ Note that for each chart, there should be a new query crated on Redash, though i
 For those recurring experiments and features like CFR, Onboarding, and Whats-new-panel, we have various template generators available for you to easily generate Redash templates.
 
 ```sh
-$ ./generate_template.py [cfr|wnp|onboarding] /path/to/output.yaml
+$ ./generate_template.py [cfr|cfr-exp|wnp|onboarding] /path/to/output.yaml
 
 # this generates a CFR experiment dashboard template
-$ ./generate_template.py cfr template/cfr/cfr-exp-foo.yaml
+$ ./generate_template.py cfr-exp template/cfr/cfr-exp-foo.yaml
 
 # then you can use this template to generate the dashboard
 $ ./generate.py template/cfr/cfr-exp-foo.yaml
