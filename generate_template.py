@@ -8,7 +8,7 @@ from jinja2 import Environment, FileSystemLoader
 
 USAGE = """
     Usage:
-        ./generate_template.py [cfr|wnp|onboarding] path/to/output.yaml
+        ./generate_template.py [cfr|cfr-exp|wnp|onboarding] path/to/output.yaml
 
     Example:
         ./generate_template.py cfr templates/cfr/output.yaml
@@ -16,6 +16,7 @@ USAGE = """
 
 TEMPLATE_PATHS = {
     "cfr": ("cfr_template_config.yaml", "cfr.yaml.template"),
+    "cfr-exp": ("cfr_exp_template_config.yaml", "cfr_exp.yaml.template"),
     "onboarding":
         ("onboarding_template_config.yaml", "onboarding.yaml.template"),
     "wnp": ("wnp_template_config.yaml", "wnp.yaml.template")
@@ -29,7 +30,7 @@ if __name__ == "__main__":
 
     if sys.argv[1] not in TEMPLATE_PATHS:
         print("Invalid template type '{}', "
-              "it must be one of 'cfr', 'wnp', and 'onboarding'"
+              "it must be one of 'cfr', 'cfr-exp', 'wnp', and 'onboarding'"
               .format(sys.argv[1]))
         sys.exit(1)
 

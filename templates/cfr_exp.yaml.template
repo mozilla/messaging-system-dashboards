@@ -54,7 +54,7 @@
 # ---------------------------------------------------------------
 
 
-title: "CFR Experiment: Picture-in-Picture Normandy in 77 (beta)"
+title: "{{ DASHBOARD_TITLE }}"
 charts:
   - title: "User Enrollment (daily)"
     type: line
@@ -66,8 +66,8 @@ charts:
       FROM `moz-fx-data-shared-prod.telemetry_derived.events_live`
       WHERE event_category = 'normandy'
         AND event_method = 'enroll'
-        AND event_string_value = 'bug-1635199-message-recommend-picture-in-picture-cfr-beta-77-77'
-        AND submission_date >= '2020-05-05'
+        AND event_string_value = '{{ EXPERIMENT_SLUG }}'
+        AND submission_date >= '{{ EXPERIMENT_BEGIN_DATE }}'
       GROUP BY 1, 2
     x_axis: date
     y_axis: enrolled
@@ -82,8 +82,8 @@ charts:
       FROM `moz-fx-data-shared-prod.telemetry_derived.events_live`
       WHERE event_category = 'normandy'
         AND event_method = 'enrollFailed'
-        AND event_string_value = 'bug-1635199-message-recommend-picture-in-picture-cfr-beta-77-77'
-        AND submission_date >= '2020-05-05'
+        AND event_string_value = '{{ EXPERIMENT_SLUG }}'
+        AND submission_date >= '{{ EXPERIMENT_BEGIN_DATE }}'
       GROUP BY 1, 2
     x_axis: date
     y_axis: failed
@@ -98,8 +98,8 @@ charts:
       FROM `moz-fx-data-shared-prod.telemetry_derived.events_live`
       WHERE event_category = 'normandy'
         AND event_method = 'unenroll'
-        AND event_string_value = 'bug-1635199-message-recommend-picture-in-picture-cfr-beta-77-77'
-        AND submission_date >= '2020-05-05'
+        AND event_string_value = '{{ EXPERIMENT_SLUG }}'
+        AND submission_date >= '{{ EXPERIMENT_BEGIN_DATE }}'
       GROUP BY 1, 2
     x_axis: date
     y_axis: unenrolled
@@ -114,13 +114,14 @@ charts:
       FROM `moz-fx-data-shared-prod.telemetry_derived.events_live`
       WHERE event_category = 'normandy'
         AND event_method = 'unenrollFailed'
-        AND event_string_value = 'bug-1635199-message-recommend-picture-in-picture-cfr-beta-77-77'
-        AND submission_date >= '2020-05-05'
+        AND event_string_value = '{{ EXPERIMENT_SLUG }}'
+        AND submission_date >= '{{ EXPERIMENT_BEGIN_DATE }}'
       GROUP BY 1, 2
     x_axis: date
     y_axis: failed
     group_by: reason
-  - title: "Daily Events - (n4s_pip_control)"
+    {% for branch in BRANCHES %}
+  - title: "Daily Events - ({{ branch }})"
     type: bar
     full_width: true
     query: |
@@ -128,29 +129,16 @@ charts:
         event,
         count(*) AS actions
       FROM `moz-fx-data-shared-prod.messaging_system_live.cfr_v1`
-      WHERE submission_timestamp >= '2020-05-05'
-        AND message_id = 'N4S_PIP_CFR_MESSSAGE'
-        AND udf.get_key(experiments, 'bug-1635199-message-recommend-picture-in-picture-cfr-beta-77-77').branch = 'n4s_pip_control'
+      WHERE submission_timestamp >= '{{ EXPERIMENT_BEGIN_DATE }}'
+        AND message_id = '{{ MESSAGE_ID }}'
+        AND udf.get_key(experiments, '{{ EXPERIMENT_SLUG }}').branch = '{{ branch }}'
       GROUP BY 1, 2
     x_axis: date
     y_axis: actions
     group_by: event
-  - title: "Daily Events - (n4s_pip_cfr)"
-    type: bar
-    full_width: true
-    query: |
-      SELECT DATE(submission_timestamp) AS date,
-        event,
-        count(*) AS actions
-      FROM `moz-fx-data-shared-prod.messaging_system_live.cfr_v1`
-      WHERE submission_timestamp >= '2020-05-05'
-        AND message_id = 'N4S_PIP_CFR_MESSSAGE'
-        AND udf.get_key(experiments, 'bug-1635199-message-recommend-picture-in-picture-cfr-beta-77-77').branch = 'n4s_pip_cfr'
-      GROUP BY 1, 2
-    x_axis: date
-    y_axis: actions
-    group_by: event
-  - title: "Daily Events Ratio - (n4s_pip_control)"
+    {% endfor %}
+    {% for branch in BRANCHES %}
+  - title: "Daily Events Ratio - ({{ branch }})"
     type: line
     full_width: true
     query: |
@@ -161,7 +149,7 @@ charts:
         CASE event
           WHEN 'IMPRESSION' THEN 'evt_1_impression'
           WHEN 'CLICK_DOORHANGER' THEN 'evt_2_click'
-          WHEN 'ENABLE' THEN 'evt_3_enable'
+          WHEN '{{ CFR_ADOPTION_EVENT[CFR_TYPE] }}' THEN 'evt_3_{{ CFR_ADOPTION_EVENT[CFR_TYPE] | lower }}'
           WHEN 'DISMISS' THEN 'evt_4_dismiss'
           WHEN 'BLOCK' THEN 'evt_5_block'
           WHEN 'MANAGE' THEN 'evt_5_manage'
@@ -170,15 +158,15 @@ charts:
         COUNT(*) AS actions,
       FROM
         `moz-fx-data-shared-prod.messaging_system_live.cfr_v1`
-      WHERE submission_timestamp >= '2020-05-05'
-        AND message_id = 'N4S_PIP_CFR_MESSSAGE'
+      WHERE submission_timestamp >= '{{ EXPERIMENT_BEGIN_DATE }}'
+        AND message_id = '{{ MESSAGE_ID }}'
         AND event IN ('IMPRESSION',
           'CLICK_DOORHANGER',
-          'ENABLE',
+          '{{ CFR_ADOPTION_EVENT[CFR_TYPE] }}',
           'DISMISS',
           'BLOCK',
           'MANAGE')
-        AND udf.get_key(experiments, 'bug-1635199-message-recommend-picture-in-picture-cfr-beta-77-77').branch = 'n4s_pip_control'
+        AND udf.get_key(experiments, '{{ EXPERIMENT_SLUG }}').branch = '{{ branch }}'
       GROUP BY
         1,
         2
@@ -196,7 +184,7 @@ charts:
       SELECT
         date,
         CAST(IFNULL(actions[SAFE_OFFSET(1)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS click_rate,
-        CAST(IFNULL(actions[SAFE_OFFSET(2)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS enable_rate,
+        CAST(IFNULL(actions[SAFE_OFFSET(2)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS {{ CFR_ADOPTION_EVENT[CFR_TYPE] | lower }}_rate,
         CAST(IFNULL(actions[SAFE_OFFSET(3)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS dismiss_rate,
         CAST(IFNULL(actions[SAFE_OFFSET(4)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS block_rate,
         CAST(IFNULL(actions[SAFE_OFFSET(5)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS manage_rate,
@@ -205,66 +193,8 @@ charts:
     x_axis: date
     y_axis:
       - click_rate
-      - enable_rate
+      - {{ CFR_ADOPTION_EVENT[CFR_TYPE] | lower }}_rate
       - dismiss_rate
       - block_rate
       - manage_rate
-  - title: "Daily Events Ratio - (n4s_pip_cfr)"
-    type: line
-    full_width: true
-    query: |
-      WITH
-      raw AS (
-      SELECT
-        DATE(submission_timestamp) AS date,
-        CASE event
-          WHEN 'IMPRESSION' THEN 'evt_1_impression'
-          WHEN 'CLICK_DOORHANGER' THEN 'evt_2_click'
-          WHEN 'ENABLE' THEN 'evt_3_enable'
-          WHEN 'DISMISS' THEN 'evt_4_dismiss'
-          WHEN 'BLOCK' THEN 'evt_5_block'
-          WHEN 'MANAGE' THEN 'evt_5_manage'
-      END
-        AS encoded_event,
-        COUNT(*) AS actions,
-      FROM
-        `moz-fx-data-shared-prod.messaging_system_live.cfr_v1`
-      WHERE submission_timestamp >= '2020-05-05'
-        AND message_id = 'N4S_PIP_CFR_MESSSAGE'
-        AND event IN ('IMPRESSION',
-          'CLICK_DOORHANGER',
-          'ENABLE',
-          'DISMISS',
-          'BLOCK',
-          'MANAGE')
-        AND udf.get_key(experiments, 'bug-1635199-message-recommend-picture-in-picture-cfr-beta-77-77').branch = 'n4s_pip_cfr'
-      GROUP BY
-        1,
-        2
-      ORDER BY
-        1,
-        2),
-      combined AS (
-      SELECT
-        date,
-        ARRAY_AGG(actions) AS actions
-      FROM
-        raw
-      GROUP BY
-        1 )
-      SELECT
-        date,
-        CAST(IFNULL(actions[SAFE_OFFSET(1)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS click_rate,
-        CAST(IFNULL(actions[SAFE_OFFSET(2)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS enable_rate,
-        CAST(IFNULL(actions[SAFE_OFFSET(3)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS dismiss_rate,
-        CAST(IFNULL(actions[SAFE_OFFSET(4)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS block_rate,
-        CAST(IFNULL(actions[SAFE_OFFSET(5)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS manage_rate,
-      FROM
-        combined
-    x_axis: date
-    y_axis:
-      - click_rate
-      - enable_rate
-      - dismiss_rate
-      - block_rate
-      - manage_rate
+    {% endfor %}

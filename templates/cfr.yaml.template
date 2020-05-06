@@ -6,49 +6,13 @@
 # ---------------------------------------------------------------
 #
 #
-#   Enrollment
+#   Daily Events - (IMPRESSION, CLICK_DOORHANGER, INSTALL, DISMISS, BLOCK, MANAGE)
 #
 #
 # ---------------------------------------------------------------
 #
 #
-#   Enrollment Failures
-#
-#
-# ---------------------------------------------------------------
-#
-#
-#   Unenrollment
-#
-#
-# ---------------------------------------------------------------
-#
-#
-#   Unenrollment Failures
-#
-#
-# ---------------------------------------------------------------
-#
-#
-#   Daily Events - Control (IMPRESSION, CLICK_DOORHANGER, INSTALL, DISMISS, BLOCK, MANAGE)
-#
-#
-# ---------------------------------------------------------------
-#
-#
-#   Daily Events - Variant_1 (IMPRESSION, CLICK_DOORHANGER, INSTALL, DISMISS, BLOCK, MANAGE)
-#
-#
-# ---------------------------------------------------------------
-#
-#
-#   Daily Events Ratio - Control (CLICK_DOORHANGER, INSTALL, DISMISS, DISMISS, BLOCK, MANAGE)
-#
-#
-# ---------------------------------------------------------------
-#
-#
-#   Daily Events Ratio - Variant_1 (CLICK_DOORHANGER, INSTALL, DISMISS, DISMISS, BLOCK, MANAGE)
+#   Daily Events Ratio - (CLICK_DOORHANGER, INSTALL, DISMISS, DISMISS, BLOCK, MANAGE)
 #
 #
 # ---------------------------------------------------------------
@@ -56,72 +20,7 @@
 
 title: "{{ DASHBOARD_TITLE }}"
 charts:
-  - title: "User Enrollment (daily)"
-    type: line
-    full_width: true
-    query: |
-      SELECT submission_date AS date,
-        udf.get_key(event_map_values, 'branch') AS branch,
-        count(distinct client_id) AS enrolled
-      FROM `moz-fx-data-shared-prod.telemetry_derived.events_live`
-      WHERE event_category = 'normandy'
-        AND event_method = 'enroll'
-        AND event_string_value = '{{ EXPERIMENT_SLUG }}'
-        AND submission_date >= '{{ EXPERIMENT_BEGIN_DATE }}'
-      GROUP BY 1, 2
-    x_axis: date
-    y_axis: enrolled
-    group_by: branch
-  - title: "User Enrollment Failures (daily)"
-    type: line
-    full_width: true
-    query: |
-      SELECT submission_date AS date,
-        udf.get_key(event_map_values, 'reason') AS reason,
-        count(distinct client_id) AS failed
-      FROM `moz-fx-data-shared-prod.telemetry_derived.events_live`
-      WHERE event_category = 'normandy'
-        AND event_method = 'enrollFailed'
-        AND event_string_value = '{{ EXPERIMENT_SLUG }}'
-        AND submission_date >= '{{ EXPERIMENT_BEGIN_DATE }}'
-      GROUP BY 1, 2
-    x_axis: date
-    y_axis: failed
-    group_by: reason
-  - title: "User Unenrollment (daily)"
-    type: line
-    full_width: true
-    query: |
-      SELECT submission_date AS date,
-        udf.get_key(event_map_values, 'branch') AS branch,
-        count(distinct client_id) AS unenrolled
-      FROM `moz-fx-data-shared-prod.telemetry_derived.events_live`
-      WHERE event_category = 'normandy'
-        AND event_method = 'unenroll'
-        AND event_string_value = '{{ EXPERIMENT_SLUG }}'
-        AND submission_date >= '{{ EXPERIMENT_BEGIN_DATE }}'
-      GROUP BY 1, 2
-    x_axis: date
-    y_axis: unenrolled
-    group_by: branch
-  - title: "User Unenrollment Failures (daily)"
-    type: line
-    full_width: true
-    query: |
-      SELECT submission_date AS date,
-        udf.get_key(event_map_values, 'reason') AS reason,
-        count(distinct client_id) AS failed
-      FROM `moz-fx-data-shared-prod.telemetry_derived.events_live`
-      WHERE event_category = 'normandy'
-        AND event_method = 'unenrollFailed'
-        AND event_string_value = '{{ EXPERIMENT_SLUG }}'
-        AND submission_date >= '{{ EXPERIMENT_BEGIN_DATE }}'
-      GROUP BY 1, 2
-    x_axis: date
-    y_axis: failed
-    group_by: reason
-    {% for branch in BRANCHES %}
-  - title: "Daily Events - ({{ branch }})"
+  - title: "Daily Events"
     type: bar
     full_width: true
     query: |
@@ -129,16 +28,13 @@ charts:
         event,
         count(*) AS actions
       FROM `moz-fx-data-shared-prod.messaging_system_live.cfr_v1`
-      WHERE submission_timestamp >= '{{ EXPERIMENT_BEGIN_DATE }}'
-        AND message_id = '{{ MESSAGE_ID }}'
-        AND udf.get_key(experiments, '{{ EXPERIMENT_SLUG }}').branch = '{{ branch }}'
+      WHERE DATE(submission_timestamp) >= DATE_SUB(CURRENT_DATE, INTERVAL 2 WEEK)
+        AND bucket_id = '{{ BUCKET_ID }}'
       GROUP BY 1, 2
     x_axis: date
     y_axis: actions
     group_by: event
-    {% endfor %}
-    {% for branch in BRANCHES %}
-  - title: "Daily Events Ratio - ({{ branch }})"
+  - title: "Daily Events Ratio"
     type: line
     full_width: true
     query: |
@@ -149,7 +45,7 @@ charts:
         CASE event
           WHEN 'IMPRESSION' THEN 'evt_1_impression'
           WHEN 'CLICK_DOORHANGER' THEN 'evt_2_click'
-          WHEN 'INSTALL' THEN 'evt_3_install'
+          WHEN '{{ CFR_ADOPTION_EVENT[CFR_TYPE] }}' THEN 'evt_3_{{ CFR_ADOPTION_EVENT[CFR_TYPE] | lower }}'
           WHEN 'DISMISS' THEN 'evt_4_dismiss'
           WHEN 'BLOCK' THEN 'evt_5_block'
           WHEN 'MANAGE' THEN 'evt_5_manage'
@@ -158,15 +54,14 @@ charts:
         COUNT(*) AS actions,
       FROM
         `moz-fx-data-shared-prod.messaging_system_live.cfr_v1`
-      WHERE submission_timestamp >= '{{ EXPERIMENT_BEGIN_DATE }}'
-        AND message_id = '{{ MESSAGE_ID }}'
+      WHERE DATE(submission_timestamp) >= DATE_SUB(CURRENT_DATE, INTERVAL 2 WEEK)
+        AND bucket_id = '{{ BUCKET_ID }}'
         AND event IN ('IMPRESSION',
           'CLICK_DOORHANGER',
-          'INSTALL',
+          '{{ CFR_ADOPTION_EVENT[CFR_TYPE] }}',
           'DISMISS',
           'BLOCK',
           'MANAGE')
-        AND udf.get_key(experiments, '{{ EXPERIMENT_SLUG }}').branch = '{{ branch }}'
       GROUP BY
         1,
         2
@@ -184,7 +79,7 @@ charts:
       SELECT
         date,
         CAST(IFNULL(actions[SAFE_OFFSET(1)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS click_rate,
-        CAST(IFNULL(actions[SAFE_OFFSET(2)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS install_rate,
+        CAST(IFNULL(actions[SAFE_OFFSET(2)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS {{ CFR_ADOPTION_EVENT[CFR_TYPE] | lower }}_rate,
         CAST(IFNULL(actions[SAFE_OFFSET(3)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS dismiss_rate,
         CAST(IFNULL(actions[SAFE_OFFSET(4)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS block_rate,
         CAST(IFNULL(actions[SAFE_OFFSET(5)], 0) AS FLOAT64) * 100 / actions[SAFE_OFFSET(0)] AS manage_rate,
@@ -193,8 +88,7 @@ charts:
     x_axis: date
     y_axis:
       - click_rate
-      - install_rate
+      - {{ CFR_ADOPTION_EVENT[CFR_TYPE] | lower }}_rate
       - dismiss_rate
       - block_rate
       - manage_rate
-    {% endfor %}
