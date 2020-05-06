@@ -202,7 +202,7 @@ charts:
     y_axis: clicks
     group_by: branch
   - title: "Daily Clicks on Individual Cards (Treatment)"
-    type: bar
+    type: line
     full_width: true
     query: |
       SELECT date(submission_timestamp) AS date,
@@ -223,7 +223,7 @@ charts:
     y_axis: clicks
     group_by: card
   - title: "Daily Clicks on Cards (Control)"
-    type: bar
+    type: line
     full_width: true
     query: |
       SELECT date(submission_timestamp) AS date,

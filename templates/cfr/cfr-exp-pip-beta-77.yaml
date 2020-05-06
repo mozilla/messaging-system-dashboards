@@ -121,7 +121,7 @@ charts:
     y_axis: failed
     group_by: reason
   - title: "Daily Events - (n4s_pip_control)"
-    type: bar
+    type: line
     full_width: true
     query: |
       SELECT DATE(submission_timestamp) AS date,
@@ -136,7 +136,7 @@ charts:
     y_axis: actions
     group_by: event
   - title: "Daily Events - (n4s_pip_cfr)"
-    type: bar
+    type: line
     full_width: true
     query: |
       SELECT DATE(submission_timestamp) AS date,

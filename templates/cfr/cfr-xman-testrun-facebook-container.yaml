@@ -55,7 +55,7 @@ charts:
     y_axis: enrolled
     group_by: branch
   - title: "Daily Events - (control)"
-    type: bar
+    type: line
     full_width: True
     query: |
       SELECT DATE(submission_timestamp) AS date,
@@ -70,7 +70,7 @@ charts:
     y_axis: actions
     group_by: event
   - title: "Daily Events - (variant_1)"
-    type: bar
+    type: line
     full_width: True
     query: |
       SELECT DATE(submission_timestamp) AS date,

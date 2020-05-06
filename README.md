@@ -47,7 +47,7 @@ group_by: event
 
 Most properties are self-explained,
 * The `query`, defined by the author, provides the input of this chart
-* The `type` sets the chart type, it could be "line", "area", "bar", "pie", "scatter", "bubble", "box", "pivot", and "table"
+* The `type` sets the chart type, it could be "line", "area", "column", "pie", "scatter", "bubble", "box", "pivot", and "table"
 * The `x_axis` and `y_axis` set the axes, they should be the columns from the SELECT statement in the `query`
 * The x axis could be further broken down by the `group_by`.
 

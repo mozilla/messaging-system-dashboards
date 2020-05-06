@@ -78,7 +78,7 @@ charts:
     y_axis: CTR
     group_by: null
   - title: "WNP 72: Access Path"
-    type: bar
+    type: column
     query: |
       SELECT EXTRACT(date FROM submission_timestamp) AS date,
         event_context,

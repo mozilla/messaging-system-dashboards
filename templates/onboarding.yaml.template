@@ -222,7 +222,7 @@ charts:
     group_by: branch
     {% for branch in BRANCHES %}
   - title: "Daily Clicks on Cards ({{ branch.slug }})"
-    type: bar
+    type: line
     full_width: true
     query: |
       SELECT date(submission_timestamp) AS date,

@@ -21,7 +21,7 @@
 title: "{{ DASHBOARD_TITLE }}"
 charts:
   - title: "Daily Events"
-    type: bar
+    type: line
     full_width: true
     query: |
       SELECT DATE(submission_timestamp) AS date,
