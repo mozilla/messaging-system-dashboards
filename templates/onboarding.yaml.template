@@ -42,13 +42,25 @@
 # ---------------------------------------------------------------
 #
 #
-#   Daily Clicks on Cards (Treatment)
+#   Daily Clicks on Cards (branch-01)
 #
 #
 # ---------------------------------------------------------------
 #
 #
-#   Daily Clicks on Cards (Control)
+#   Daily Session End (branch-01)
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Clicks on Cards (branch-02, ..., N)
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Session End (branch-02, ..., N)
 #
 #
 # ---------------------------------------------------------------
@@ -210,4 +222,20 @@ charts:
     x_axis: date
     y_axis: clicks
     group_by: card
+  - title: "Daily Session End ({{ branch.slug }})"
+    type: line
+    full_width: true
+    query: |
+      SELECT date(submission_timestamp) AS date,
+        IFNULL(JSON_EXTRACT_SCALAR(event_context, '$.reason'), 'undefined') as reason,
+        count(*) AS sessions
+      FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
+      WHERE submission_timestamp >= '{{ EXPERIMENT_BEGIN_DATE }}'
+        AND event = 'SESSION_END'
+        AND udf.get_key(experiments, '{{ EXPERIMENT_SLUG }}').branch = '{{ branch.slug }}'
+        AND event_context like '%about:welcome%'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: sessions
+    group_by: reason
     {% endfor %}

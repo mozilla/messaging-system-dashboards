@@ -42,17 +42,30 @@
 # ---------------------------------------------------------------
 #
 #
-#   Daily Clicks on Cards (Treatment)
+#   Daily Clicks on Cards (branch-01)
 #
 #
 # ---------------------------------------------------------------
 #
 #
-#   Daily Clicks on Cards (Control)
+#   Daily Session End (branch-01)
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Clicks on Cards (branch-02, ..., N)
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Session End (branch-02, ..., N)
 #
 #
 # ---------------------------------------------------------------
 title: "Onboarding Exeperiment: N4S Privacy Protection X-MAN beta 76"
+
 charts:
   - title: "User Enrollment (daily)"
     type: line
@@ -70,22 +83,6 @@ charts:
     x_axis: date
     y_axis: enrolled
     group_by: branch
-  - title: "User Enrollment Failures (daily)"
-    type: line
-    full_width: true
-    query: |
-      SELECT submission_date AS date,
-        udf.get_key(event_map_values, 'reason') AS reason,
-        count(distinct client_id) AS failed
-      FROM `moz-fx-data-shared-prod.telemetry_derived.events_live`
-      WHERE event_category = 'normandy'
-        AND event_method = 'enrollFailed'
-        AND event_string_value = 'bug-1635870-message-privacy-protections-report-onboarding-n4s-beta-76-77'
-        AND submission_date >= '2020-05-07'
-      GROUP BY 1, 2
-    x_axis: date
-    y_axis: failed
-    group_by: reason
   - title: "User Unenrollment (daily)"
     type: line
     full_width: true
@@ -102,33 +99,17 @@ charts:
     x_axis: date
     y_axis: unenrolled
     group_by: branch
-  - title: "User Unenrollment Failures (daily)"
-    type: line
-    full_width: true
-    query: |
-      SELECT submission_date AS date,
-        udf.get_key(event_map_values, 'reason') AS reason,
-        count(distinct client_id) AS failed
-      FROM `moz-fx-data-shared-prod.telemetry_derived.events_live`
-      WHERE event_category = 'normandy'
-        AND event_method = 'unenrollFailed'
-        AND event_string_value = 'bug-1635870-message-privacy-protections-report-onboarding-n4s-beta-76-77'
-        AND submission_date >= '2020-05-07'
-      GROUP BY 1, 2
-    x_axis: date
-    y_axis: failed
-    group_by: reason
   - title: "Daily Unique Users of Impressions"
     type: line
     full_width: true
     query: |
       SELECT date(submission_timestamp) AS date,
-        udf.get_key(experiments, '').branch as branch,
+        udf.get_key(experiments, 'bug-1635870-message-privacy-protections-report-onboarding-n4s-beta-76-77').branch as branch,
         count(distinct client_id) AS unique_users
       FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
       WHERE submission_timestamp >= '2020-05-07'
         AND event = 'IMPRESSION'
-        AND message_id LIKE 'SIMPLIFIED_ABOUT_WELCOME_%'
+        AND message_id LIKE '%ABOUT_WELCOME%'
         AND udf.get_key(experiments, 'bug-1635870-message-privacy-protections-report-onboarding-n4s-beta-76-77').branch IS NOT NULL
         AND event_context like '%about:welcome%'
       GROUP BY 1, 2
@@ -145,7 +126,7 @@ charts:
       FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
       WHERE submission_timestamp >= '2020-05-07'
         AND event = 'IMPRESSION'
-        AND message_id LIKE 'SIMPLIFIED_ABOUT_WELCOME_%'
+        AND message_id LIKE '%ABOUT_WELCOME%'
         AND udf.get_key(experiments, 'bug-1635870-message-privacy-protections-report-onboarding-n4s-beta-76-77').branch IS NOT NULL
         AND event_context like '%about:welcome%'
       GROUP BY 1, 2
@@ -180,7 +161,7 @@ charts:
         FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
         WHERE submission_timestamp >= '2020-05-07'
           AND event = 'IMPRESSION'
-          AND message_id LIKE 'SIMPLIFIED_ABOUT_WELCOME_%'
+          AND message_id LIKE '%ABOUT_WELCOME%'
           AND udf.get_key(experiments, 'bug-1635870-message-privacy-protections-report-onboarding-n4s-beta-76-77').branch IS NOT NULL
           AND event_context like '%about:welcome%'
         GROUP BY 1, 2),
@@ -213,9 +194,9 @@ charts:
       FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
       WHERE submission_timestamp >= '2020-05-07'
         AND event = 'CLICK_BUTTON'
-        AND message_id = 'START_BROWSING_BUTTON'
+        AND message_id = '%ABOUT:WELCOME%'
         AND udf.get_key(experiments, 'bug-1635870-message-privacy-protections-report-onboarding-n4s-beta-76-77').branch IS NOT NULL
-        AND event_context like '%about:welcome%'
+        AND event_context like '%START_BROWSING_BUTTON%'
       GROUP BY 1, 2
     x_axis: date
     y_axis: clicks
@@ -241,6 +222,22 @@ charts:
     x_axis: date
     y_axis: clicks
     group_by: card
+  - title: "Daily Session End (n4s_protections_report_control)"
+    type: line
+    full_width: true
+    query: |
+      SELECT date(submission_timestamp) AS date,
+        IFNULL(JSON_EXTRACT_SCALAR(event_context, '$.reason'), 'undefined') as reason,
+        count(*) AS sessions
+      FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
+      WHERE submission_timestamp >= '2020-05-07'
+        AND event = 'SESSION_END'
+        AND udf.get_key(experiments, 'bug-1635870-message-privacy-protections-report-onboarding-n4s-beta-76-77').branch = 'n4s_protections_report_control'
+        AND event_context like '%about:welcome%'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: sessions
+    group_by: reason
   - title: "Daily Clicks on Cards (n4s_protections_report_position1)"
     type: line
     full_width: true
@@ -262,6 +259,22 @@ charts:
     x_axis: date
     y_axis: clicks
     group_by: card
+  - title: "Daily Session End (n4s_protections_report_position1)"
+    type: line
+    full_width: true
+    query: |
+      SELECT date(submission_timestamp) AS date,
+        IFNULL(JSON_EXTRACT_SCALAR(event_context, '$.reason'), 'undefined') as reason,
+        count(*) AS sessions
+      FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
+      WHERE submission_timestamp >= '2020-05-07'
+        AND event = 'SESSION_END'
+        AND udf.get_key(experiments, 'bug-1635870-message-privacy-protections-report-onboarding-n4s-beta-76-77').branch = 'n4s_protections_report_position1'
+        AND event_context like '%about:welcome%'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: sessions
+    group_by: reason
   - title: "Daily Clicks on Cards (n4s_protections_report_position2)"
     type: line
     full_width: true
@@ -283,6 +296,22 @@ charts:
     x_axis: date
     y_axis: clicks
     group_by: card
+  - title: "Daily Session End (n4s_protections_report_position2)"
+    type: line
+    full_width: true
+    query: |
+      SELECT date(submission_timestamp) AS date,
+        IFNULL(JSON_EXTRACT_SCALAR(event_context, '$.reason'), 'undefined') as reason,
+        count(*) AS sessions
+      FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
+      WHERE submission_timestamp >= '2020-05-07'
+        AND event = 'SESSION_END'
+        AND udf.get_key(experiments, 'bug-1635870-message-privacy-protections-report-onboarding-n4s-beta-76-77').branch = 'n4s_protections_report_position2'
+        AND event_context like '%about:welcome%'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: sessions
+    group_by: reason
   - title: "Daily Clicks on Cards (n4s_protections_report_position3)"
     type: line
     full_width: true
@@ -304,3 +333,19 @@ charts:
     x_axis: date
     y_axis: clicks
     group_by: card
+  - title: "Daily Session End (n4s_protections_report_position3)"
+    type: line
+    full_width: true
+    query: |
+      SELECT date(submission_timestamp) AS date,
+        IFNULL(JSON_EXTRACT_SCALAR(event_context, '$.reason'), 'undefined') as reason,
+        count(*) AS sessions
+      FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
+      WHERE submission_timestamp >= '2020-05-07'
+        AND event = 'SESSION_END'
+        AND udf.get_key(experiments, 'bug-1635870-message-privacy-protections-report-onboarding-n4s-beta-76-77').branch = 'n4s_protections_report_position3'
+        AND event_context like '%about:welcome%'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: sessions
+    group_by: reason
