@@ -123,12 +123,12 @@ charts:
     full_width: true
     query: |
       SELECT date(submission_timestamp) AS date,
-        udf.get_key(experiments, '{{ EXPERIMENT_SLUGP }}').branch as branch,
+        udf.get_key(experiments, '{{ EXPERIMENT_SLUG }}').branch as branch,
         count(distinct client_id) AS unique_users
       FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
       WHERE submission_timestamp >= '{{ EXPERIMENT_BEGIN_DATE }}'
         AND event = 'IMPRESSION'
-        AND message_id LIKE 'SIMPLIFIED_ABOUT_WELCOME_%'
+        AND message_id LIKE '%ABOUT_WELCOME%'
         AND udf.get_key(experiments, '{{ EXPERIMENT_SLUG }}').branch IS NOT NULL
         AND event_context like '%about:welcome%'
       GROUP BY 1, 2
@@ -145,7 +145,7 @@ charts:
       FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
       WHERE submission_timestamp >= '{{ EXPERIMENT_BEGIN_DATE }}'
         AND event = 'IMPRESSION'
-        AND message_id LIKE 'SIMPLIFIED_ABOUT_WELCOME_%'
+        AND message_id LIKE '%ABOUT_WELCOME%'
         AND udf.get_key(experiments, '{{ EXPERIMENT_SLUG }}').branch IS NOT NULL
         AND event_context like '%about:welcome%'
       GROUP BY 1, 2
@@ -180,7 +180,7 @@ charts:
         FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
         WHERE submission_timestamp >= '{{ EXPERIMENT_BEGIN_DATE }}'
           AND event = 'IMPRESSION'
-          AND message_id LIKE 'SIMPLIFIED_ABOUT_WELCOME_%'
+          AND message_id LIKE '%ABOUT_WELCOME%'
           AND udf.get_key(experiments, '{{ EXPERIMENT_SLUG }}').branch IS NOT NULL
           AND event_context like '%about:welcome%'
         GROUP BY 1, 2),
@@ -213,9 +213,9 @@ charts:
       FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
       WHERE submission_timestamp >= '{{ EXPERIMENT_BEGIN_DATE }}'
         AND event = 'CLICK_BUTTON'
-        AND message_id = 'START_BROWSING_BUTTON'
+        AND message_id = '%ABOUT:WELCOME%'
         AND udf.get_key(experiments, '{{ EXPERIMENT_SLUG }}').branch IS NOT NULL
-        AND event_context like '%about:welcome%'
+        AND event_context like '%START_BROWSING_BUTTON%'
       GROUP BY 1, 2
     x_axis: date
     y_axis: clicks
