@@ -12,19 +12,7 @@
 # ---------------------------------------------------------------
 #
 #
-#   Enrollment Failures
-#
-#
-# ---------------------------------------------------------------
-#
-#
 #   Unenrollment
-#
-#
-# ---------------------------------------------------------------
-#
-#
-#   Unenrollment Failures
 #
 #
 # ---------------------------------------------------------------
@@ -72,22 +60,6 @@ charts:
     x_axis: date
     y_axis: enrolled
     group_by: branch
-  - title: "User Enrollment Failures (daily)"
-    type: line
-    full_width: true
-    query: |
-      SELECT submission_date AS date,
-        udf.get_key(event_map_values, 'reason') AS reason,
-        count(distinct client_id) AS failed
-      FROM `moz-fx-data-shared-prod.telemetry_derived.events_live`
-      WHERE event_category = 'normandy'
-        AND event_method = 'enrollFailed'
-        AND event_string_value = '{{ EXPERIMENT_SLUG }}'
-        AND submission_date >= '{{ EXPERIMENT_BEGIN_DATE }}'
-      GROUP BY 1, 2
-    x_axis: date
-    y_axis: failed
-    group_by: reason
   - title: "User Unenrollment (daily)"
     type: line
     full_width: true
@@ -104,22 +76,6 @@ charts:
     x_axis: date
     y_axis: unenrolled
     group_by: branch
-  - title: "User Unenrollment Failures (daily)"
-    type: line
-    full_width: true
-    query: |
-      SELECT submission_date AS date,
-        udf.get_key(event_map_values, 'reason') AS reason,
-        count(distinct client_id) AS failed
-      FROM `moz-fx-data-shared-prod.telemetry_derived.events_live`
-      WHERE event_category = 'normandy'
-        AND event_method = 'unenrollFailed'
-        AND event_string_value = '{{ EXPERIMENT_SLUG }}'
-        AND submission_date >= '{{ EXPERIMENT_BEGIN_DATE }}'
-      GROUP BY 1, 2
-    x_axis: date
-    y_axis: failed
-    group_by: reason
     {% for branch in BRANCHES %}
   - title: "Daily Events - ({{ branch }})"
     type: line
