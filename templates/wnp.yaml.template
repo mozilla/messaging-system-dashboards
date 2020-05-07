@@ -34,7 +34,7 @@
 #
 #
 # ---------------------------------------------------------------
-title: "{{ DASHBOARD_TITLE }}"
+title: {{ DASHBOARD_TITLE }}
 charts:
   - title: "WNP {{ FIREFOX_VERSON }}: Badge Impression & Clicks"
     type: line
