@@ -1,0 +1,351 @@
+---
+# Dashboard template for Onboarding
+#
+#
+#                    Dashboard Layout
+# ---------------------------------------------------------------
+#
+#
+#   Enrollment
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Unique Users of Impressions
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Impressions
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Card Clicks
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Click Through Rate
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Clicks on "Start Browsing"
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Clicks on Cards (branch-01)
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Session End (branch-01)
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Clicks on Cards (branch-02, ..., N)
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Session End (branch-02, ..., N)
+#
+#
+# ---------------------------------------------------------------
+title: "Messaging System Experiment: about:welcome Pull Factor in Firefox 76"
+
+charts:
+  - title: "User Enrollment (daily)"
+    type: line
+    full_width: true
+    query: |
+      SELECT submission_date AS date,
+        udf.get_key(event_map_values, 'branch') AS branch,
+        count(distinct client_id) AS enrolled
+      FROM `moz-fx-data-shared-prod.telemetry_derived.events_live`
+      WHERE event_category = 'normandy'
+        AND event_method = 'enroll'
+        AND event_string_value = 'bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77'
+        AND submission_date >= '2020-05-14'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: enrolled
+    group_by: branch
+  - title: "User Unenrollment (daily)"
+    type: line
+    full_width: true
+    query: |
+      SELECT submission_date AS date,
+        udf.get_key(event_map_values, 'branch') AS branch,
+        count(distinct client_id) AS unenrolled
+      FROM `moz-fx-data-shared-prod.telemetry_derived.events_live`
+      WHERE event_category = 'normandy'
+        AND event_method = 'unenroll'
+        AND event_string_value = 'bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77'
+        AND submission_date >= '2020-05-14'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: unenrolled
+    group_by: branch
+  - title: "Daily Unique Users of Impressions"
+    type: line
+    full_width: true
+    query: |
+      SELECT date(submission_timestamp) AS date,
+        udf.get_key(experiments, 'bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77').branch as branch,
+        count(distinct client_id) AS unique_users
+      FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
+      WHERE submission_timestamp >= '2020-05-14'
+        AND event = 'IMPRESSION'
+        AND message_id LIKE '%ABOUT_WELCOME%'
+        AND udf.get_key(experiments, 'bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77').branch IS NOT NULL
+        AND event_context like '%about:welcome%'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: unique_users
+    group_by: branch
+  - title: "Daily Impressions"
+    type: line
+    full_width: true
+    query: |
+      SELECT date(submission_timestamp) AS date,
+        udf.get_key(experiments, 'bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77').branch as branch,
+        count(*) AS impressions
+      FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
+      WHERE submission_timestamp >= '2020-05-14'
+        AND event = 'IMPRESSION'
+        AND message_id LIKE '%ABOUT_WELCOME%'
+        AND udf.get_key(experiments, 'bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77').branch IS NOT NULL
+        AND event_context like '%about:welcome%'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: impressions
+    group_by: branch
+  - title: "Daily Total Card Clicks"
+    type: line
+    full_width: true
+    query: |
+      SELECT date(submission_timestamp) AS date,
+        udf.get_key(experiments, 'bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77').branch as branch,
+        count(*) AS clicks
+      FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
+      WHERE submission_timestamp >= '2020-05-14'
+        AND event = 'CLICK_BUTTON'
+        AND message_id IN ('TRAILHEAD_CARD_2', 'TRAILHEAD_CARD_3', 'TRAILHEAD_CARD_4', 'TRAILHEAD_CARD_12')
+        AND udf.get_key(experiments, 'bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77').branch IS NOT NULL
+        AND event_context like '%about:welcome%'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: clicks
+    group_by: branch
+  - title: "Daily Click Through Rate (Overall)"
+    type: line
+    full_width: true
+    query: |
+      WITH imps AS(
+        SELECT date(submission_timestamp) AS date,
+          udf.get_key(experiments, 'bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77').branch as branch,
+          count(*) AS impressions
+        FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
+        WHERE submission_timestamp >= '2020-05-14'
+          AND event = 'IMPRESSION'
+          AND message_id LIKE '%ABOUT_WELCOME%'
+          AND udf.get_key(experiments, 'bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77').branch IS NOT NULL
+          AND event_context like '%about:welcome%'
+        GROUP BY 1, 2),
+      clicks AS (
+        SELECT date(submission_timestamp) AS date,
+          udf.get_key(experiments, 'bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77').branch as branch,
+          count(*) AS clicks
+        FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
+        WHERE submission_timestamp >= '2020-05-14'
+          AND event = 'CLICK_BUTTON'
+          AND message_id IN ('TRAILHEAD_CARD_2', 'TRAILHEAD_CARD_3', 'TRAILHEAD_CARD_4', 'TRAILHEAD_CARD_12')
+          AND udf.get_key(experiments, 'bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77').branch IS NOT NULL
+          AND event_context like '%about:welcome%'
+        GROUP BY 1, 2)
+      SELECT imps.date,
+        imps.branch,
+        CAST(clicks.clicks AS FLOAT64) * 100 / imps.impressions AS ctr
+      FROM imps
+      JOIN clicks ON imps.date = clicks.date AND imps.branch = clicks.branch
+    x_axis: date
+    y_axis: ctr
+    group_by: branch
+  - title: "Daily Clicks on 'Start Browsing' Button"
+    type: line
+    full_width: true
+    query: |
+      SELECT date(submission_timestamp) AS date,
+         udf.get_key(experiments, 'bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77').branch as branch,
+         count(*) AS clicks
+      FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
+      WHERE submission_timestamp >= '2020-05-14'
+        AND event = 'CLICK_BUTTON'
+        AND message_id = '%ABOUT:WELCOME%'
+        AND udf.get_key(experiments, 'bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77').branch IS NOT NULL
+        AND event_context like '%START_BROWSING_BUTTON%'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: clicks
+    group_by: branch
+  - title: "Daily Clicks on Cards (control)"
+    type: line
+    full_width: true
+    query: |
+      SELECT date(submission_timestamp) AS date,
+         CASE message_id
+          WHEN 'TRAILHEAD_CARD_2' THEN 'Sync'
+          WHEN 'TRAILHEAD_CARD_3' THEN 'Monitor'
+          WHEN 'TRAILHEAD_CARD_4' THEN 'Private Browsing'
+         END AS card,
+         count(*) AS clicks
+      FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
+      WHERE submission_timestamp >= '2020-05-14'
+        AND event = 'CLICK_BUTTON'
+        AND message_id IN ('TRAILHEAD_CARD_2', 'TRAILHEAD_CARD_3', 'TRAILHEAD_CARD_4')
+        AND udf.get_key(experiments, 'bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77').branch = 'control'
+        AND event_context like '%about:welcome%'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: clicks
+    group_by: card
+  - title: "Daily Session End (control)"
+    type: line
+    full_width: true
+    query: |
+      SELECT date(submission_timestamp) AS date,
+        IFNULL(JSON_EXTRACT_SCALAR(event_context, '$.reason'), 'undefined') as reason,
+        count(*) AS sessions
+      FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
+      WHERE submission_timestamp >= '2020-05-14'
+        AND event = 'SESSION_END'
+        AND udf.get_key(experiments, 'bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77').branch = 'control'
+        AND event_context like '%about:welcome%'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: sessions
+    group_by: reason
+  - title: "Daily Clicks on Cards (treatment-variation-b)"
+    type: line
+    full_width: true
+    query: |
+      SELECT date(submission_timestamp) AS date,
+         CASE message_id
+          WHEN 'TRAILHEAD_CARD_12' THEN 'Data Promise'
+          WHEN 'TRAILHEAD_CARD_3' THEN 'Monitor'
+          WHEN 'TRAILHEAD_CARD_4' THEN 'Private Browsing'
+         END AS card,
+         count(*) AS clicks
+      FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
+      WHERE submission_timestamp >= '2020-05-14'
+        AND event = 'CLICK_BUTTON'
+        AND message_id IN ('TRAILHEAD_CARD_12', 'TRAILHEAD_CARD_3', 'TRAILHEAD_CARD_4')
+        AND udf.get_key(experiments, 'bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77').branch = 'treatment-variation-b'
+        AND event_context like '%about:welcome%'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: clicks
+    group_by: card
+  - title: "Daily Session End (treatment-variation-b)"
+    type: line
+    full_width: true
+    query: |
+      SELECT date(submission_timestamp) AS date,
+        IFNULL(JSON_EXTRACT_SCALAR(event_context, '$.reason'), 'undefined') as reason,
+        count(*) AS sessions
+      FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
+      WHERE submission_timestamp >= '2020-05-14'
+        AND event = 'SESSION_END'
+        AND udf.get_key(experiments, 'bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77').branch = 'treatment-variation-b'
+        AND event_context like '%about:welcome%'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: sessions
+    group_by: reason
+  - title: "Daily Clicks on Cards (treatment-variation-c)"
+    type: line
+    full_width: true
+    query: |
+      SELECT date(submission_timestamp) AS date,
+         CASE message_id
+          WHEN 'TRAILHEAD_CARD_12' THEN 'Data Promise'
+          WHEN 'TRAILHEAD_CARD_3' THEN 'Monitor'
+          WHEN 'TRAILHEAD_CARD_3' THEN 'Monitor'
+         END AS card,
+         count(*) AS clicks
+      FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
+      WHERE submission_timestamp >= '2020-05-14'
+        AND event = 'CLICK_BUTTON'
+        AND message_id IN ('TRAILHEAD_CARD_12', 'TRAILHEAD_CARD_3', 'TRAILHEAD_CARD_3')
+        AND udf.get_key(experiments, 'bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77').branch = 'treatment-variation-c'
+        AND event_context like '%about:welcome%'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: clicks
+    group_by: card
+  - title: "Daily Session End (treatment-variation-c)"
+    type: line
+    full_width: true
+    query: |
+      SELECT date(submission_timestamp) AS date,
+        IFNULL(JSON_EXTRACT_SCALAR(event_context, '$.reason'), 'undefined') as reason,
+        count(*) AS sessions
+      FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
+      WHERE submission_timestamp >= '2020-05-14'
+        AND event = 'SESSION_END'
+        AND udf.get_key(experiments, 'bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77').branch = 'treatment-variation-c'
+        AND event_context like '%about:welcome%'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: sessions
+    group_by: reason
+  - title: "Daily Clicks on Cards (treatment-variation-d)"
+    type: line
+    full_width: true
+    query: |
+      SELECT date(submission_timestamp) AS date,
+         CASE message_id
+          WHEN 'TRAILHEAD_CARD_2' THEN 'Sync'
+          WHEN 'TRAILHEAD_CARD_3' THEN 'Monitor'
+          WHEN 'TRAILHEAD_CARD_4' THEN 'Private Browsing'
+         END AS card,
+         count(*) AS clicks
+      FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
+      WHERE submission_timestamp >= '2020-05-14'
+        AND event = 'CLICK_BUTTON'
+        AND message_id IN ('TRAILHEAD_CARD_2', 'TRAILHEAD_CARD_3', 'TRAILHEAD_CARD_4')
+        AND udf.get_key(experiments, 'bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77').branch = 'treatment-variation-d'
+        AND event_context like '%about:welcome%'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: clicks
+    group_by: card
+  - title: "Daily Session End (treatment-variation-d)"
+    type: line
+    full_width: true
+    query: |
+      SELECT date(submission_timestamp) AS date,
+        IFNULL(JSON_EXTRACT_SCALAR(event_context, '$.reason'), 'undefined') as reason,
+        count(*) AS sessions
+      FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
+      WHERE submission_timestamp >= '2020-05-14'
+        AND event = 'SESSION_END'
+        AND udf.get_key(experiments, 'bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77').branch = 'treatment-variation-d'
+        AND event_context like '%about:welcome%'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: sessions
+    group_by: reason

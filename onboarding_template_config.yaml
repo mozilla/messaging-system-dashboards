@@ -1,39 +1,37 @@
 ---  # Onboarding template config
 
 DASHBOARD_TITLE: |
-  "Onboarding Exeperiment: N4S Privacy Protection X-MAN beta 76"
-EXPERIMENT_SLUG: bug-1635870-message-privacy-protections-report-onboarding-n4s-beta-76-77
-EXPERIMENT_BEGIN_DATE: 2020-05-07
+  "Messaging System Experiment: about:welcome Pull Factor in Firefox 76"
+EXPERIMENT_SLUG: bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77
+EXPERIMENT_BEGIN_DATE: 2020-05-14
 BRANCHES:
-  - slug: n4s_protections_report_control
+  - slug: control
     cards:
       - TRAILHEAD_CARD_2
       - TRAILHEAD_CARD_3
       - TRAILHEAD_CARD_4
-  - slug: n4s_protections_report_position1
+  - slug: treatment-variation-b
     cards:
-      - TRAILHEAD_CARD_13
+      - TRAILHEAD_CARD_12
       - TRAILHEAD_CARD_3
       - TRAILHEAD_CARD_4
-  - slug: n4s_protections_report_position2
-    cards:
-      - TRAILHEAD_CARD_12
-      - TRAILHEAD_CARD_13
-      - TRAILHEAD_CARD_3
-  - slug: n4s_protections_report_position3
+  - slug: treatment-variation-c
     cards:
       - TRAILHEAD_CARD_12
       - TRAILHEAD_CARD_3
-      - TRAILHEAD_CARD_13
+      - TRAILHEAD_CARD_3
+  - slug: treatment-variation-d
+    cards:
+      - TRAILHEAD_CARD_2
+      - TRAILHEAD_CARD_3
+      - TRAILHEAD_CARD_4
 TRIPLET_ID_LIST:
   - TRAILHEAD_CARD_2
   - TRAILHEAD_CARD_3
   - TRAILHEAD_CARD_4
   - TRAILHEAD_CARD_12
-  - TRAILHEAD_CARD_13
 CARD_ID_MAP:
   TRAILHEAD_CARD_2: Sync
   TRAILHEAD_CARD_3: Monitor
   TRAILHEAD_CARD_4: Private Browsing
   TRAILHEAD_CARD_12: Data Promise
-  TRAILHEAD_CARD_13: Protection Report
