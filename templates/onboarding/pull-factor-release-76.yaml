@@ -283,13 +283,13 @@ charts:
          CASE message_id
           WHEN 'TRAILHEAD_CARD_12' THEN 'Data Promise'
           WHEN 'TRAILHEAD_CARD_3' THEN 'Monitor'
-          WHEN 'TRAILHEAD_CARD_3' THEN 'Monitor'
+          WHEN 'TRAILHEAD_CARD_4' THEN 'Private Browsing'
          END AS card,
          count(*) AS clicks
       FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
       WHERE submission_timestamp >= '2020-05-14'
         AND event = 'CLICK_BUTTON'
-        AND message_id IN ('TRAILHEAD_CARD_12', 'TRAILHEAD_CARD_3', 'TRAILHEAD_CARD_3')
+        AND message_id IN ('TRAILHEAD_CARD_12', 'TRAILHEAD_CARD_3', 'TRAILHEAD_CARD_4')
         AND udf.get_key(experiments, 'bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77').branch = 'treatment-variation-c'
         AND event_context like '%about:welcome%'
       GROUP BY 1, 2

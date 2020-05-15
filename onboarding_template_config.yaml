@@ -19,7 +19,7 @@ BRANCHES:
     cards:
       - TRAILHEAD_CARD_12
       - TRAILHEAD_CARD_3
-      - TRAILHEAD_CARD_3
+      - TRAILHEAD_CARD_4
   - slug: treatment-variation-d
     cards:
       - TRAILHEAD_CARD_2
