@@ -1,28 +1,23 @@
 ---  # Onboarding template config
 
 DASHBOARD_TITLE: |
-  "Messaging System Experiment: about:welcome Pull Factor in Firefox 76"
-EXPERIMENT_SLUG: bug-1637316-message-aboutwelcome-pull-factor-reinforcement-76-rel-release-76-77
-EXPERIMENT_BEGIN_DATE: 2020-05-14
+  "Messaging System Experiment: Multi-Stage about:welcome in Firefox beta 78"
+EXPERIMENT_SLUG: bug-1644521-message-multi-stage-aboutwelcome-v1-78-beta-v2-beta-78-79
+EXPERIMENT_BEGIN_DATE: 2020-06-12
 BRANCHES:
   - slug: control
     cards:
       - TRAILHEAD_CARD_2
       - TRAILHEAD_CARD_3
       - TRAILHEAD_CARD_4
-  - slug: treatment-variation-b
+  - slug: treatment-static
     cards:
       - TRAILHEAD_CARD_12
       - TRAILHEAD_CARD_3
       - TRAILHEAD_CARD_4
-  - slug: treatment-variation-c
+  - slug: treatment-dynamic
     cards:
       - TRAILHEAD_CARD_12
-      - TRAILHEAD_CARD_3
-      - TRAILHEAD_CARD_4
-  - slug: treatment-variation-d
-    cards:
-      - TRAILHEAD_CARD_2
       - TRAILHEAD_CARD_3
       - TRAILHEAD_CARD_4
 TRIPLET_ID_LIST:
