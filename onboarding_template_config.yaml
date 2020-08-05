@@ -1,21 +1,26 @@
 ---  # Onboarding template config
 
 DASHBOARD_TITLE: |
-  "Messaging System Experiment: Multi-Stage about:welcome in Firefox beta 78"
-EXPERIMENT_SLUG: bug-1644521-message-multi-stage-aboutwelcome-v1-78-beta-v2-beta-78-79
-EXPERIMENT_BEGIN_DATE: 2020-06-12
+  "Messaging System Experiment: Multi-Stage about:welcome V2 in Firefox 79"
+EXPERIMENT_SLUG: bug-1653032-message-multi-stage-aboutwelcome-v2-79-release-release-79-80
+EXPERIMENT_BEGIN_DATE: 2020-08-04
 BRANCHES:
   - slug: control
     cards:
       - TRAILHEAD_CARD_2
       - TRAILHEAD_CARD_3
       - TRAILHEAD_CARD_4
-  - slug: treatment-static
+  - slug: treatment-a
     cards:
       - TRAILHEAD_CARD_12
       - TRAILHEAD_CARD_3
       - TRAILHEAD_CARD_4
-  - slug: treatment-dynamic
+  - slug: treatment-b
+    cards:
+      - TRAILHEAD_CARD_12
+      - TRAILHEAD_CARD_3
+      - TRAILHEAD_CARD_4
+  - slug: treatment-c
     cards:
       - TRAILHEAD_CARD_12
       - TRAILHEAD_CARD_3

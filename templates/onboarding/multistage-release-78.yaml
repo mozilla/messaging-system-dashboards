@@ -1,0 +1,147 @@
+---
+# Dashboard template for Onboarding
+#
+#
+#                    Dashboard Layout
+# ---------------------------------------------------------------
+#
+#
+#   Enrollment
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Unique Users of Impressions
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Impressions
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Card Clicks
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Click Through Rate
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Clicks on "Start Browsing"
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Clicks on Cards (branch-01)
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Session End (branch-01)
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Clicks on Cards (branch-02, ..., N)
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Daily Session End (branch-02, ..., N)
+#
+#
+# ---------------------------------------------------------------
+title: "Messaging System Experiment: Multi-Stage about:welcome in Firefox 78"
+
+charts:
+  - title: "User Enrollment (daily)"
+    type: line
+    query: |
+      SELECT submission_date AS date,
+        udf.get_key(event_map_values, 'branch') AS branch,
+        count(distinct client_id) AS enrolled
+      FROM `moz-fx-data-shared-prod.telemetry_derived.events_live`
+      WHERE event_category = 'normandy'
+        AND event_method = 'enroll'
+        AND event_string_value = 'bug-1644257-message-multi-stage-aboutwelcome-v1-78-release-release-78-79'
+        AND submission_date >= '2020-07-07'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: enrolled
+    group_by: branch
+  - title: "User Unenrollment (daily)"
+    type: line
+    query: |
+      SELECT submission_date AS date,
+        udf.get_key(event_map_values, 'branch') AS branch,
+        count(distinct client_id) AS unenrolled
+      FROM `moz-fx-data-shared-prod.telemetry_derived.events_live`
+      WHERE event_category = 'normandy'
+        AND event_method = 'unenroll'
+        AND event_string_value = 'bug-1644257-message-multi-stage-aboutwelcome-v1-78-release-release-78-79'
+        AND submission_date >= '2020-07-07'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: unenrolled
+    group_by: branch
+  - title: "Daily Unique Users of Impressions"
+    type: line
+    query: |
+      SELECT date(submission_timestamp) AS date,
+        udf.get_key(experiments, 'bug-1644257-message-multi-stage-aboutwelcome-v1-78-release-release-78-79').branch as branch,
+        count(distinct client_id) AS unique_users
+      FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
+      WHERE submission_timestamp >= '2020-07-07'
+        AND event = 'IMPRESSION'
+        AND message_id IN ('ABOUT_WELCOME', 'MULTI-STAGE-WELCOME', 'MULTI-STAGE-WELCOME-IMPORTABLE')
+        AND udf.get_key(experiments, 'bug-1644257-message-multi-stage-aboutwelcome-v1-78-release-release-78-79').branch IS NOT NULL
+        AND event_context like '%about:welcome%'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: unique_users
+    group_by: branch
+  - title: "Daily Impressions by Branch"
+    type: line
+    query: |
+      SELECT date(submission_timestamp) AS date,
+        udf.get_key(experiments, 'bug-1644257-message-multi-stage-aboutwelcome-v1-78-release-release-78-79').branch as branch,
+        count(*) AS impressions
+      FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
+      WHERE submission_timestamp >= '2020-07-07'
+        AND event = 'IMPRESSION'
+        AND message_id IN ('ABOUT_WELCOME', 'MULTI-STAGE-WELCOME', 'MULTI-STAGE-WELCOME-IMPORTABLE')
+        AND udf.get_key(experiments, 'bug-1644257-message-multi-stage-aboutwelcome-v1-78-release-release-78-79').branch IS NOT NULL
+        AND event_context like '%about:welcome%'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: impressions
+    group_by: branch
+  - title: "Daily Impressions by message_id"
+    type: line
+    query: |
+      SELECT date(submission_timestamp) AS date,
+        message_id,
+        count(*) AS impressions
+      FROM `moz-fx-data-shared-prod.messaging_system_live.onboarding_v1`
+      WHERE submission_timestamp >= '2020-07-07'
+        AND event = 'IMPRESSION'
+        AND message_id IN ('ABOUT_WELCOME', 'MULTI-STAGE-WELCOME', 'MULTI-STAGE-WELCOME-IMPORTABLE')
+        AND udf.get_key(experiments, 'bug-1644257-message-multi-stage-aboutwelcome-v1-78-release-release-78-79').branch IS NOT NULL
+        AND event_context like '%about:welcome%'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: impressions
+    group_by: message_id
