@@ -52,7 +52,8 @@
 #
 #
 # ---------------------------------------------------------------
-title: {{ DASHBOARD_TITLE }}
+title: |
+  {{ DASHBOARD_TITLE }}
 charts:
   - title: "WNP {{ FIREFOX_VERSON }}: Badge Impression & Clicks (Total)"
     type: column
@@ -148,6 +149,7 @@ charts:
     group_by: null
   - title: "WNP {{ FIREFOX_VERSON }}: Click by Badge First Seen Days"
     type: pie
+    full_width: true
     query: |
         WITH clicks AS
         (

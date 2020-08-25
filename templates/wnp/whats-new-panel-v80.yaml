@@ -52,7 +52,9 @@
 #
 #
 # ---------------------------------------------------------------
-title: "Messaging System: What's New Panel in Firefox 80"
+title: |
+  Messaging System: What's New Panel in Firefox 80
+
 charts:
   - title: "WNP 80: Badge Impression & Clicks (Total)"
     type: column
@@ -69,11 +71,10 @@ charts:
         AND event in ('IMPRESSION', 'CLICK')
         AND message_id = 'WHATS_NEW_BADGE_80'
       GROUP BY 1
-    x_axis: date
+    x_axis: event
     y_axis:
       - count
       - dau
-    group_by: event
     show_data_labels: true
   - title: "WNP 80: Badge Impression & Clicks (Daily Unique Users)"
     type: line
@@ -149,6 +150,7 @@ charts:
     group_by: null
   - title: "WNP 80: Click by Badge First Seen Days"
     type: pie
+    full_width: true
     query: |
         WITH clicks AS
         (
@@ -229,7 +231,7 @@ charts:
         AND version LIKE '80%'
         AND message_id IN ('WHATS_NEW_BETTER_PDF_78', 'WHATS_NEW_COOKIES_PROTECTION_80', 'WHATS_NEW_PROTECTIONS_DASHBOARD_78')
         AND event = 'CLICK'
-      GROUP BY 1, 2
+      GROUP BY 1
     x_axis: message_id
     y_axis: clicks
     group_by: null
