@@ -1,12 +1,14 @@
 ---  # Whats-new-panel template config
 
-DASHBOARD_TITLE: "Messaging System: What's New Panel in Firefox 78"
-FIREFOX_VERSON: 78
-RELEASE_BEGIN_DATE: 2020-06-30
-RELEASE_END_DATE: 2020-07-27
-WNP_BADGE_ID: WHATS_NEW_BADGE_78
+DASHBOARD_TITLE: |
+  Messaging System: What's New Panel in Firefox 80
+FIREFOX_VERSON: 80
+RELEASE_BEGIN_DATE: 2020-08-24
+RELEASE_END_DATE: 2020-09-22
+WNP_BADGE_ID: WHATS_NEW_BADGE_80
 PANEL_MESSAGE_IDS:
   # The order matters, it should have the same order as the `bucket_id` in the
   # panel impression ping
   - WHATS_NEW_BETTER_PDF_78
+  - WHATS_NEW_COOKIES_PROTECTION_80
   - WHATS_NEW_PROTECTIONS_DASHBOARD_78

@@ -57,7 +57,8 @@ def main():
                     "xAxis": {
                         "type": "Auto Detect",
                         "labels": {"enable": True}
-                    }
+                    },
+                    "showDataLabels": chart.get("show_data_labels", False)
                 }
             ).json()
 

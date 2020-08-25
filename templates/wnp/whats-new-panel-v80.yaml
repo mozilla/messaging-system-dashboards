@@ -52,9 +52,9 @@
 #
 #
 # ---------------------------------------------------------------
-title: {{ DASHBOARD_TITLE }}
+title: "Messaging System: What's New Panel in Firefox 80"
 charts:
-  - title: "WNP {{ FIREFOX_VERSON }}: Badge Impression & Clicks (Total)"
+  - title: "WNP 80: Badge Impression & Clicks (Total)"
     type: column
     full_width: true
     query: |
@@ -63,50 +63,51 @@ charts:
        COUNT(DISTINCT client_id) AS dau,
        COUNT(*) as count,
       FROM `moz-fx-data-shared-prod.messaging_system.whats_new_panel`
-      WHERE DATE(submission_timestamp) BETWEEN '{{ RELEASE_BEGIN_DATE }}' AND '{{ RELEASE_END_DATE }}'
+      WHERE DATE(submission_timestamp) BETWEEN '2020-08-24' AND '2020-09-22'
         AND release_channel = 'release'
-        AND version LIKE '{{ FIREFOX_VERSON }}%'
+        AND version LIKE '80%'
         AND event in ('IMPRESSION', 'CLICK')
-        AND message_id = '{{ WNP_BADGE_ID }}'
+        AND message_id = 'WHATS_NEW_BADGE_80'
       GROUP BY 1
-    x_axis: event
+    x_axis: date
     y_axis:
       - count
       - dau
+    group_by: event
     show_data_labels: true
-  - title: "WNP {{ FIREFOX_VERSON }}: Badge Impression & Clicks (Daily Unique Users)"
+  - title: "WNP 80: Badge Impression & Clicks (Daily Unique Users)"
     type: line
     query: |
       SELECT EXTRACT(date from submission_timestamp) as date,
        event,
        COUNT(DISTINCT client_id) as dau,
       FROM `moz-fx-data-shared-prod.messaging_system.whats_new_panel`
-      WHERE DATE(submission_timestamp) BETWEEN '{{ RELEASE_BEGIN_DATE }}' AND '{{ RELEASE_END_DATE }}'
+      WHERE DATE(submission_timestamp) BETWEEN '2020-08-24' AND '2020-09-22'
         AND release_channel = 'release'
-        AND version LIKE '{{ FIREFOX_VERSON }}%'
+        AND version LIKE '80%'
         AND event in ('IMPRESSION', 'CLICK')
-        AND message_id = '{{ WNP_BADGE_ID }}'
+        AND message_id = 'WHATS_NEW_BADGE_80'
       GROUP BY 1, 2
     x_axis: date
     y_axis: dau
     group_by: event
-  - title: "WNP {{ FIREFOX_VERSON }}: Badge Impression & Clicks (Daily Events)"
+  - title: "WNP 80: Badge Impression & Clicks (Daily Events)"
     type: line
     query: |
       SELECT EXTRACT(date from submission_timestamp) as date,
        event,
        COUNT(DISTINCT client_id) as events,
       FROM `moz-fx-data-shared-prod.messaging_system.whats_new_panel`
-      WHERE DATE(submission_timestamp) BETWEEN '{{ RELEASE_BEGIN_DATE }}' AND '{{ RELEASE_END_DATE }}'
+      WHERE DATE(submission_timestamp) BETWEEN '2020-08-24' AND '2020-09-22'
         AND release_channel = 'release'
-        AND version LIKE '{{ FIREFOX_VERSON }}%'
+        AND version LIKE '80%'
         AND event in ('IMPRESSION', 'CLICK')
-        AND message_id = '{{ WNP_BADGE_ID }}'
+        AND message_id = 'WHATS_NEW_BADGE_80'
       GROUP BY 1, 2
     x_axis: date
     y_axis: events
     group_by: event
-  - title: "WNP {{ FIREFOX_VERSON }}: Badge CTR"
+  - title: "WNP 80: Badge CTR"
     type: line
     full_width: true
     query: |
@@ -115,10 +116,10 @@ charts:
           EXTRACT(date from submission_timestamp) as date,
           count(*) as clicks
         FROM `moz-fx-data-shared-prod.messaging_system.whats_new_panel`
-        WHERE DATE(submission_timestamp) BETWEEN '{{ RELEASE_BEGIN_DATE }}' AND '{{ RELEASE_END_DATE }}'
+        WHERE DATE(submission_timestamp) BETWEEN '2020-08-24' AND '2020-09-22'
           AND release_channel = 'release'
-          AND version LIKE '{{ FIREFOX_VERSON }}%'
-          AND message_id = '{{ WNP_BADGE_ID }}'
+          AND version LIKE '80%'
+          AND message_id = 'WHATS_NEW_BADGE_80'
           AND event = 'CLICK'
         GROUP BY
           1
@@ -128,10 +129,10 @@ charts:
           EXTRACT(date from submission_timestamp) as date,
           count(*) as impressions
         FROM `moz-fx-data-shared-prod.messaging_system.whats_new_panel`
-        WHERE DATE(submission_timestamp) BETWEEN '{{ RELEASE_BEGIN_DATE }}' AND '{{ RELEASE_END_DATE }}'
+        WHERE DATE(submission_timestamp) BETWEEN '2020-08-24' AND '2020-09-22'
           AND release_channel = 'release'
-          AND version LIKE '{{ FIREFOX_VERSON }}%'
-          AND message_id = '{{ WNP_BADGE_ID }}'
+          AND version LIKE '80%'
+          AND message_id = 'WHATS_NEW_BADGE_80'
           AND event = 'IMPRESSION'
         GROUP BY
           1
@@ -146,7 +147,7 @@ charts:
     x_axis: date
     y_axis: CTR
     group_by: null
-  - title: "WNP {{ FIREFOX_VERSON }}: Click by Badge First Seen Days"
+  - title: "WNP 80: Click by Badge First Seen Days"
     type: pie
     query: |
         WITH clicks AS
@@ -158,11 +159,11 @@ charts:
             FROM
                 `moz-fx-data-shared-prod.messaging_system.whats_new_panel`
             WHERE
-                DATE(submission_timestamp) BETWEEN '{{ RELEASE_BEGIN_DATE }}' AND '{{ RELEASE_END_DATE }}'
+                DATE(submission_timestamp) BETWEEN '2020-08-24' AND '2020-09-22'
                 AND event = 'CLICK'
                 AND release_channel = 'release'
-                AND version LIKE '{{ FIREFOX_VERSON }}%'
-                AND message_id = '{{ WNP_BADGE_ID }}'
+                AND version LIKE '80%'
+                AND message_id = 'WHATS_NEW_BADGE_80'
             GROUP BY
                 1, 2
         ),
@@ -179,11 +180,11 @@ charts:
             USING
                 (client_id)
             WHERE
-                DATE(submission_timestamp) BETWEEN '{{ RELEASE_BEGIN_DATE }}' AND '{{ RELEASE_END_DATE }}'
+                DATE(submission_timestamp) BETWEEN '2020-08-24' AND '2020-09-22'
                 AND event = 'IMPRESSION'
                 AND release_channel = 'release'
-                AND version LIKE '{{ FIREFOX_VERSON }}%'
-                AND message_id = '{{ WNP_BADGE_ID }}'
+                AND version LIKE '80%'
+                AND message_id = 'WHATS_NEW_BADGE_80'
             GROUP BY
                 1
         ),
@@ -215,7 +216,7 @@ charts:
     y_axis: users
     group_by: null
     show_data_labels: True
-  - title: "WNP {{ FIREFOX_VERSON }}: Message Clicks (Total)"
+  - title: "WNP 80: Message Clicks (Total)"
     type: column
     full_width: true
     query: |
@@ -223,17 +224,17 @@ charts:
         message_id,
         count(*) AS clicks,
       FROM `moz-fx-data-shared-prod.messaging_system.whats_new_panel`
-      WHERE DATE(submission_timestamp) BETWEEN '{{ RELEASE_BEGIN_DATE }}' AND '{{ RELEASE_END_DATE }}'
+      WHERE DATE(submission_timestamp) BETWEEN '2020-08-24' AND '2020-09-22'
         AND release_channel = 'release'
-        AND version LIKE '{{FIREFOX_VERSON}}%'
-        AND message_id IN ('{{ PANEL_MESSAGE_IDS|join("', '") }}')
+        AND version LIKE '80%'
+        AND message_id IN ('WHATS_NEW_BETTER_PDF_78', 'WHATS_NEW_COOKIES_PROTECTION_80', 'WHATS_NEW_PROTECTIONS_DASHBOARD_78')
         AND event = 'CLICK'
-      GROUP BY 1
+      GROUP BY 1, 2
     x_axis: message_id
     y_axis: clicks
     group_by: null
     show_data_labels: True
-  - title: "WNP {{ FIREFOX_VERSON }}: Message Clicks (Daily)"
+  - title: "WNP 80: Message Clicks (Daily)"
     type: line
     full_width: true
     query: |
@@ -241,16 +242,16 @@ charts:
         message_id,
         count(*) AS clicks,
       FROM `moz-fx-data-shared-prod.messaging_system.whats_new_panel`
-      WHERE DATE(submission_timestamp) BETWEEN '{{ RELEASE_BEGIN_DATE }}' AND '{{ RELEASE_END_DATE }}'
+      WHERE DATE(submission_timestamp) BETWEEN '2020-08-24' AND '2020-09-22'
         AND release_channel = 'release'
-        AND version LIKE '{{FIREFOX_VERSON}}%'
-        AND message_id IN ('{{ PANEL_MESSAGE_IDS|join("', '") }}')
+        AND version LIKE '80%'
+        AND message_id IN ('WHATS_NEW_BETTER_PDF_78', 'WHATS_NEW_COOKIES_PROTECTION_80', 'WHATS_NEW_PROTECTIONS_DASHBOARD_78')
         AND event = 'CLICK'
       GROUP BY 1, 2
     x_axis: date
     y_axis: clicks
     group_by: message_id
-  - title: "WNP {{ FIREFOX_VERSON }}: Message Click Through Rates"
+  - title: "WNP 80: Message Click Through Rates"
     type: line
     full_width: true
     query: |
@@ -258,22 +259,22 @@ charts:
         (SELECT EXTRACT(date FROM submission_timestamp) AS date,
                 count(*) AS impressions
          FROM `moz-fx-data-shared-prod.messaging_system.whats_new_panel`
-         WHERE DATE(submission_timestamp) BETWEEN '{{ RELEASE_BEGIN_DATE }}' AND '{{ RELEASE_END_DATE }}'
+         WHERE DATE(submission_timestamp) BETWEEN '2020-08-24' AND '2020-09-22'
            AND release_channel = 'release'
-           AND version LIKE '{{ FIREFOX_VERSON }}%'
+           AND version LIKE '80%'
            AND event = 'IMPRESSION'
-           AND message_id = '{{ PANEL_MESSAGE_IDS|join(",") }}'
+           AND message_id = 'WHATS_NEW_BETTER_PDF_78,WHATS_NEW_COOKIES_PROTECTION_80,WHATS_NEW_PROTECTIONS_DASHBOARD_78'
          GROUP BY 1),
            clicks AS
         (SELECT EXTRACT(date FROM submission_timestamp) AS date,
                 message_id,
                 count(*) AS clicks,
          FROM `moz-fx-data-shared-prod.messaging_system.whats_new_panel`
-         WHERE DATE(submission_timestamp) BETWEEN '{{ RELEASE_BEGIN_DATE }}' AND '{{ RELEASE_END_DATE }}'
+         WHERE DATE(submission_timestamp) BETWEEN '2020-08-24' AND '2020-09-22'
            AND release_channel = 'release'
-           AND version LIKE '{{ FIREFOX_VERSON }}%'
+           AND version LIKE '80%'
            AND event = 'CLICK'
-         AND message_id IN ('{{ PANEL_MESSAGE_IDS|join("', '") }}')
+         AND message_id IN ('WHATS_NEW_BETTER_PDF_78', 'WHATS_NEW_COOKIES_PROTECTION_80', 'WHATS_NEW_PROTECTIONS_DASHBOARD_78')
          GROUP BY 1,
                   2)
       SELECT clicks.date,
@@ -284,7 +285,7 @@ charts:
     x_axis: date
     y_axis: ctr
     group_by: message_id
-  - title: "WNP {{ FIREFOX_VERSON }}: Access Path"
+  - title: "WNP 80: Access Path"
     type: line
     full_width: true
     query: |
@@ -292,10 +293,10 @@ charts:
         event_context,
         count(*) as count
       FROM `moz-fx-data-shared-prod.messaging_system.whats_new_panel`
-      WHERE DATE(submission_timestamp) BETWEEN '{{ RELEASE_BEGIN_DATE }}' AND '{{ RELEASE_END_DATE }}'
+      WHERE DATE(submission_timestamp) BETWEEN '2020-08-24' AND '2020-09-22'
         AND release_channel = 'release'
-        AND version LIKE '{{ FIREFOX_VERSON }}%'
-        AND message_id = '{{ PANEL_MESSAGE_IDS|join(",") }}'
+        AND version LIKE '80%'
+        AND message_id = 'WHATS_NEW_BETTER_PDF_78,WHATS_NEW_COOKIES_PROTECTION_80,WHATS_NEW_PROTECTIONS_DASHBOARD_78'
       GROUP BY 1, 2;
     x_axis: date
     y_axis: count
