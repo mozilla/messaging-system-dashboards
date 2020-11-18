@@ -1,11 +1,13 @@
 ---  # CFR experiment template config
 
-DASHBOARD_TITLE: "CFR Experiment: Picture-in-Picture Normandy in 77 (beta)"
-EXPERIMENT_SLUG: recommend-picture-in-picture-cfr-normandy
+DASHBOARD_TITLE: "CFR Experiment: Homepage Remediation Search Value (v2) in 83"
+EXPERIMENT_SLUG: message-homepage-remediation-v2-search-value-props-exper-release-83
 BRANCHES:
-  - n4s_pip_control
-  - n4s_pip_cfr
-EXPERIMENT_BEGIN_DATE: 2020-05-06
+  - treatment-a
+  - treatment-b
+  - treatment-c
+  - control
+EXPERIMENT_BEGIN_DATE: 2020-11-18
 MESSAGE_ID: N4S_PIP_CFR_MESSSAGE_NORMANDY
 # CFR type could be either "cfrAddons" or "cfrFeatures". This decides the event
 # of the recommendation adoption. I.e. "INSTALL" for "cfrAddons", "ENABLE" for

@@ -86,7 +86,7 @@ charts:
         count(*) AS actions
       FROM `moz-fx-data-shared-prod.messaging_system_live.cfr_v1`
       WHERE submission_timestamp >= '{{ EXPERIMENT_BEGIN_DATE }}'
-        AND message_id = '{{ MESSAGE_ID }}'
+        AND message_id = '{{ EXPERIMENT_SLUG + ":" + branch }}'
         AND udf.get_key(experiments, '{{ EXPERIMENT_SLUG }}').branch = '{{ branch }}'
       GROUP BY 1, 2
     x_axis: date
@@ -115,7 +115,7 @@ charts:
       FROM
         `moz-fx-data-shared-prod.messaging_system_live.cfr_v1`
       WHERE submission_timestamp >= '{{ EXPERIMENT_BEGIN_DATE }}'
-        AND message_id = '{{ MESSAGE_ID }}'
+        AND message_id = '{{ EXPERIMENT_SLUG + ":" + branch }}'
         AND event IN ('IMPRESSION',
           'CLICK_DOORHANGER',
           '{{ CFR_ADOPTION_EVENT[CFR_TYPE] }}',
