@@ -1,0 +1,305 @@
+---
+# Redash dashboard template for Whats-new-panel.
+#
+#
+#                    Dashboard Layout
+# ---------------------------------------------------------------
+#
+#
+#   Badge: Impression/Clicks (Total)
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Badge: Impression/Clicks (Daily)
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Badge: CTR
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Badge: Click by Badge First Seen Days
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Panel Message Clicks (Total)
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Panel Message Clicks (Daily)
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   Panel Message CTR
+#
+#
+# ---------------------------------------------------------------
+#
+#
+#   What's New Access Path
+#
+#
+# ---------------------------------------------------------------
+title: |
+  Messaging System: What's New Panel in Firefox 82
+
+charts:
+  - title: "WNP 82: Badge Impression & Clicks (Total)"
+    type: column
+    full_width: true
+    query: |
+      SELECT
+       event,
+       COUNT(DISTINCT client_id) AS dau,
+       COUNT(*) as count,
+      FROM `moz-fx-data-shared-prod.messaging_system_live.whats_new_panel_v1`
+      WHERE DATE(submission_timestamp) BETWEEN '2020-10-20' AND '2020-11-17'
+        AND release_channel = 'release'
+        AND version LIKE '82%'
+        AND event in ('IMPRESSION', 'CLICK')
+        AND message_id = 'WHATS_NEW_BADGE_82'
+      GROUP BY 1
+    x_axis: event
+    y_axis:
+      - count
+      - dau
+    show_data_labels: true
+  - title: "WNP 82: Badge Impression & Clicks (Daily Unique Users)"
+    type: line
+    query: |
+      SELECT EXTRACT(date from submission_timestamp) as date,
+       event,
+       COUNT(DISTINCT client_id) as dau,
+      FROM `moz-fx-data-shared-prod.messaging_system_live.whats_new_panel_v1`
+      WHERE DATE(submission_timestamp) BETWEEN '2020-10-20' AND '2020-11-17'
+        AND release_channel = 'release'
+        AND version LIKE '82%'
+        AND event in ('IMPRESSION', 'CLICK')
+        AND message_id = 'WHATS_NEW_BADGE_82'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: dau
+    group_by: event
+  - title: "WNP 82: Badge Impression & Clicks (Daily Events)"
+    type: line
+    query: |
+      SELECT EXTRACT(date from submission_timestamp) as date,
+       event,
+       COUNT(DISTINCT client_id) as events,
+      FROM `moz-fx-data-shared-prod.messaging_system_live.whats_new_panel_v1`
+      WHERE DATE(submission_timestamp) BETWEEN '2020-10-20' AND '2020-11-17'
+        AND release_channel = 'release'
+        AND version LIKE '82%'
+        AND event in ('IMPRESSION', 'CLICK')
+        AND message_id = 'WHATS_NEW_BADGE_82'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: events
+    group_by: event
+  - title: "WNP 82: Badge CTR"
+    type: line
+    full_width: true
+    query: |
+      WITH clicks AS (
+        SELECT
+          EXTRACT(date from submission_timestamp) as date,
+          count(*) as clicks
+        FROM `moz-fx-data-shared-prod.messaging_system_live.whats_new_panel_v1`
+        WHERE DATE(submission_timestamp) BETWEEN '2020-10-20' AND '2020-11-17'
+          AND release_channel = 'release'
+          AND version LIKE '82%'
+          AND message_id = 'WHATS_NEW_BADGE_82'
+          AND event = 'CLICK'
+        GROUP BY
+          1
+      ),
+      impressions AS (
+        SELECT
+          EXTRACT(date from submission_timestamp) as date,
+          count(*) as impressions
+        FROM `moz-fx-data-shared-prod.messaging_system_live.whats_new_panel_v1`
+        WHERE DATE(submission_timestamp) BETWEEN '2020-10-20' AND '2020-11-17'
+          AND release_channel = 'release'
+          AND version LIKE '82%'
+          AND message_id = 'WHATS_NEW_BADGE_82'
+          AND event = 'IMPRESSION'
+        GROUP BY
+          1
+      )
+      SELECT
+        clicks.*,
+        impressions.impressions,
+        cast(clicks.clicks as float64) / impressions.impressions * 100 as CTR
+      FROM
+        clicks
+        JOIN impressions ON clicks.date = impressions.date
+    x_axis: date
+    y_axis: CTR
+    group_by: null
+  - title: "WNP 82: Click by Badge First Seen Days"
+    type: pie
+    full_width: true
+    query: |
+        WITH clicks AS
+        (
+            SELECT
+                DATE(submission_timestamp) AS date,
+                client_id,
+                COUNT(*)
+            FROM
+                `moz-fx-data-shared-prod.messaging_system_live.whats_new_panel_v1`
+            WHERE
+                DATE(submission_timestamp) BETWEEN '2020-10-20' AND '2020-11-17'
+                AND event = 'CLICK'
+                AND release_channel = 'release'
+                AND version LIKE '82%'
+                AND message_id = 'WHATS_NEW_BADGE_82'
+            GROUP BY
+                1, 2
+        ),
+            imps AS
+        (
+            SELECT
+                client_id,
+                DATE(MIN(submission_timestamp)) AS first_seen,
+                COUNT(*) AS impressions
+            FROM
+                `moz-fx-data-shared-prod.messaging_system_live.whats_new_panel_v1`
+            JOIN
+                (SELECT DISTINCT client_id FROM clicks)
+            USING
+                (client_id)
+            WHERE
+                DATE(submission_timestamp) BETWEEN '2020-10-20' AND '2020-11-17'
+                AND event = 'IMPRESSION'
+                AND release_channel = 'release'
+                AND version LIKE '82%'
+                AND message_id = 'WHATS_NEW_BADGE_82'
+            GROUP BY
+                1
+        ),
+            joined AS
+        (
+            SELECT
+                c.client_id,
+                DATE_DIFF(c.date, i.first_seen, DAY) AS days_since_seen,
+                i.impressions,
+            FROM
+                clicks AS c
+            JOIN
+                imps AS i
+            USING
+                (client_id)
+        )
+        SELECT
+            days_since_seen,
+            COUNT(*) AS users
+        FROM
+            joined
+        WHERE
+            days_since_seen >= 0
+        GROUP BY
+            1
+        ORDER BY
+            1
+    x_axis: days_since_seen
+    y_axis: users
+    group_by: null
+    show_data_labels: True
+  - title: "WNP 82: Message Clicks (Total)"
+    type: column
+    full_width: true
+    query: |
+      SELECT
+        message_id,
+        count(*) AS clicks,
+      FROM `moz-fx-data-shared-prod.messaging_system_live.whats_new_panel_v1`
+      WHERE DATE(submission_timestamp) BETWEEN '2020-10-20' AND '2020-11-17'
+        AND release_channel = 'release'
+        AND version LIKE '82%'
+        AND message_id IN ('WHATS_NEW_BETTER_PDF_78', 'WHATS_NEW_COOKIES_PROTECTION_80', 'WHATS_NEW_MEDIA_SESSION_82')
+        AND event = 'CLICK'
+      GROUP BY 1
+    x_axis: message_id
+    y_axis: clicks
+    group_by: null
+    show_data_labels: True
+  - title: "WNP 82: Message Clicks (Daily)"
+    type: line
+    full_width: true
+    query: |
+      SELECT EXTRACT(date FROM submission_timestamp) AS date,
+        message_id,
+        count(*) AS clicks,
+      FROM `moz-fx-data-shared-prod.messaging_system_live.whats_new_panel_v1`
+      WHERE DATE(submission_timestamp) BETWEEN '2020-10-20' AND '2020-11-17'
+        AND release_channel = 'release'
+        AND version LIKE '82%'
+        AND message_id IN ('WHATS_NEW_BETTER_PDF_78', 'WHATS_NEW_COOKIES_PROTECTION_80', 'WHATS_NEW_MEDIA_SESSION_82')
+        AND event = 'CLICK'
+      GROUP BY 1, 2
+    x_axis: date
+    y_axis: clicks
+    group_by: message_id
+  - title: "WNP 82: Message Click Through Rates"
+    type: line
+    full_width: true
+    query: |
+      WITH imps AS
+        (SELECT EXTRACT(date FROM submission_timestamp) AS date,
+                count(*) AS impressions
+         FROM `moz-fx-data-shared-prod.messaging_system_live.whats_new_panel_v1`
+         WHERE DATE(submission_timestamp) BETWEEN '2020-10-20' AND '2020-11-17'
+           AND release_channel = 'release'
+           AND version LIKE '82%'
+           AND event = 'IMPRESSION'
+           AND message_id = 'WHATS_NEW_BETTER_PDF_78,WHATS_NEW_COOKIES_PROTECTION_80,WHATS_NEW_MEDIA_SESSION_82'
+         GROUP BY 1),
+           clicks AS
+        (SELECT EXTRACT(date FROM submission_timestamp) AS date,
+                message_id,
+                count(*) AS clicks,
+         FROM `moz-fx-data-shared-prod.messaging_system_live.whats_new_panel_v1`
+         WHERE DATE(submission_timestamp) BETWEEN '2020-10-20' AND '2020-11-17'
+           AND release_channel = 'release'
+           AND version LIKE '82%'
+           AND event = 'CLICK'
+         AND message_id IN ('WHATS_NEW_BETTER_PDF_78', 'WHATS_NEW_COOKIES_PROTECTION_80', 'WHATS_NEW_MEDIA_SESSION_82')
+         GROUP BY 1,
+                  2)
+      SELECT clicks.date,
+          clicks.message_id,
+          CAST(clicks.clicks AS FLOAT64) * 100 / imps.impressions AS ctr
+      FROM clicks
+      JOIN imps ON clicks.date = imps.date
+    x_axis: date
+    y_axis: ctr
+    group_by: message_id
+  - title: "WNP 82: Access Path"
+    type: line
+    full_width: true
+    query: |
+      SELECT EXTRACT(date FROM submission_timestamp) AS date,
+        event_context,
+        count(*) as count
+      FROM `moz-fx-data-shared-prod.messaging_system_live.whats_new_panel_v1`
+      WHERE DATE(submission_timestamp) BETWEEN '2020-10-20' AND '2020-11-17'
+        AND release_channel = 'release'
+        AND version LIKE '82%'
+        AND message_id = 'WHATS_NEW_BETTER_PDF_78,WHATS_NEW_COOKIES_PROTECTION_80,WHATS_NEW_MEDIA_SESSION_82'
+      GROUP BY 1, 2;
+    x_axis: date
+    y_axis: count
+    group_by: event_context
